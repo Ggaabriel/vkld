@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Poppins:wght@500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*{
+  font-family: "Inter", sans-serif;
+}
+body{
+  background-color: #22333B;
+}
+button{
+  border-radius: 26px;
+  background: #ffffff10;
+  backdrop-filter: blur(15px);
+  border: 1px solid #ffffff20;
+  transition: scale 300ms;
+}
+button:hover{
+  scale: 0.9;
+
+}
+
+.swiper {
+  /* width: 100%;
+  height: 100%; */
+}
+
+.swiper-slide {
+  text-align: center;
+  font-size: 18px;
+  background: #fff;
+
+  /* Center slide text vertically */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #22333B;
+  position: relative;
+}
+
+.swiper-slide>img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  opacity: 26%;
+}
+
+.swiper-pagination-bullet{
+  background: #ffffff;
+}
