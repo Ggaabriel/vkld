@@ -1,32 +1,32 @@
-import { prop } from '@typegoose/typegoose';
-import { Base, TimeStamps } from '@typegoose/typegoose/lib/defaultClasses';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 class Advantages {
-  @prop()
+  @Prop({ required: true })
   header: string;
-  @prop()
+  @Prop({ required: true })
   svgType: number;
 }
 
 class AdvantagesHeaders {
-  @prop()
+  @Prop({ required: true })
   header: string;
-  @prop({ type: () => [Advantages] })
+  @Prop({ type: [Advantages] })
   advantages: Advantages[];
 }
-export interface ProductModel extends Base {}
-export class ProductModel extends TimeStamps {
-  @prop({ type: () => [String] })
+@Schema({ timestamps: true })
+export class ProductModel {
+  @Prop({ type: [String] })
   images: string[];
-  @prop()
+  @Prop({ required: true })
   title: string;
-  @prop()
+  @Prop({ required: true })
   address: string;
-  @prop()
+  @Prop({ required: true })
   description: string;
-  @prop()
+  @Prop({ required: true })
   calculatedRating: number;
-  @prop({ type: () => [AdvantagesHeaders] })
+  @Prop({ type: [AdvantagesHeaders] })
   advantagesHeaders: AdvantagesHeaders[];
-  categories: string[];
 }
+
+export const ProductModelSchema = SchemaFactory.createForClass(ProductModel);

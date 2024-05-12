@@ -70,8 +70,9 @@ export class AuthController {
         name,
         image: image !== undefined ? image.path : '',
       });
+      const token = this.jwtService.sign({ _id: user._id });
 
-      return user;
+      return { token };
     } catch (error) {
       if (image && fs.existsSync(image.path)) {
         fs.unlinkSync(image.path);
