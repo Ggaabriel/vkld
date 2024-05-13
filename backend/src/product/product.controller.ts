@@ -57,6 +57,7 @@ export class ProductController {
     try {
       // Создаем объект с данными нового продукта
       const newProductData: ProductDto = createProductDto;
+      console.log(createProductDto);
 
       // Если изображения были загружены, сохраняем их пути в данных нового продукта
       if (images && images.length > 0) {

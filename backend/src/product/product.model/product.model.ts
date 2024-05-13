@@ -19,14 +19,18 @@ export class ProductModel {
   images: string[];
   @Prop({ required: true })
   title: string;
-  @Prop({ required: true })
-  address: string;
+  @Prop({ type: [Number], required: true })
+  address: number[];
   @Prop({ required: true })
   description: string;
   @Prop({ required: true })
   calculatedRating: number;
   @Prop({ type: [AdvantagesHeaders] })
   advantagesHeaders: AdvantagesHeaders[];
+  @Prop({ type: [String], required: true })
+  categories: string[];
+  @Prop({ required: true })
+  userId: string;
 }
 
 export const ProductModelSchema = SchemaFactory.createForClass(ProductModel);

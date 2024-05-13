@@ -4,6 +4,7 @@ import { AuthModel, AuthModelSchema } from './auth.model/auth.model';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
+import { ProductModel, ProductModelSchema } from 'src/product/product.model/product.model';
 
 @Module({
   controllers: [AuthController],
@@ -12,6 +13,10 @@ import { JwtModule } from '@nestjs/jwt';
       {
         name: AuthModel.name,
         schema: AuthModelSchema,
+      },
+      {
+        name: ProductModel.name,
+        schema: ProductModelSchema,
       },
     ]),
     JwtModule.registerAsync({

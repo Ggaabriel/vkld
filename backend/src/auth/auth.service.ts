@@ -4,10 +4,14 @@ import { AuthModel } from './auth.model/auth.model';
 import { Model } from 'mongoose';
 import { AuthDto, AuthUserDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
+import { ProductModel } from 'src/product/product.model/product.model';
 
 @Injectable()
 export class AuthService {
-  constructor(@InjectModel(AuthModel.name) private authModel: Model<AuthModel>) {}
+  constructor(
+    @InjectModel(AuthModel.name) private authModel: Model<AuthModel>,
+    @InjectModel(ProductModel.name) private productModel: Model<ProductModel>,
+  ) {}
   async hashPassword(password: string): Promise<string> {
     const saltRounds = 10; // Количество раундов соли для увеличения безопасности хэширования
     return await bcrypt.hash(password, saltRounds);
@@ -33,6 +37,7 @@ export class AuthService {
     return await this.authModel.findById(userId).exec();
   }
   async deleteUserById(userId: string) {
+    await this.productModel.deleteMany({ userId: userId }).exec();
     return await this.authModel.deleteOne({ _id: userId }).exec();
   }
 }

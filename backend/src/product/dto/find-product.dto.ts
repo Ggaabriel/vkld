@@ -1,11 +1,6 @@
 import { IsNotEmpty, IsString, IsNumber, ValidateNested, ArrayMinSize } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class FindProduct {
-  calculatedRating: number;
-  limit: number;
-}
-
 export class AdvantagesDto {
   @IsNotEmpty()
   @IsString()
@@ -41,8 +36,7 @@ export class ProductDto {
   description: string;
 
   @IsNotEmpty()
-  @IsString()
-  address: string;
+  address: number[];
 
   @IsNotEmpty()
   @IsNumber()
@@ -53,4 +47,10 @@ export class ProductDto {
   @ValidateNested({ each: true })
   @Type(() => AdvantagesHeadersDto)
   advantagesHeaders: AdvantagesHeadersDto[];
+
+  @IsNotEmpty()
+  categories: string[];
+  @IsNotEmpty()
+  @IsString()
+  userId: string;
 }
