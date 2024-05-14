@@ -37,7 +37,7 @@ function App() {
      get()
     }
 
-    isLogin ?    return (
+    return isLogin ? (
       <Routes>
         <Route element={<Header />}>
           <Route path="/" element={<Home />} />
@@ -45,7 +45,7 @@ function App() {
         </Route>
         <Route path="/login" element={<Auth />} />
       </Routes>
-    ) : return (
+    ) :  (
       <div>Загрузка</div>
     )
 
