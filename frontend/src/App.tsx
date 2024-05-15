@@ -11,13 +11,14 @@ import axios from 'axios';
 import { baseUrl } from './app/fetch';
 import { setUser } from './app/store/slice/UserSlice';
 import { useAppSelector } from './app/hooks/useAppSelector';
+import Register from './pages/Register';
 
 function App() {
   const dispatch = useAppDispatch();
   const { isLogin, user } = useAppSelector((state) => state.user);
-    const token = localStorage.getItem('token');
-    async function get() {
-      await axios
+  const token = localStorage.getItem('token');
+  async function get() {
+    await axios
       .get(`${baseUrl}/auth`, {
         headers: {
           token: token,
@@ -25,30 +26,28 @@ function App() {
       })
       .then(async ({ data }) => {
         console.log(31);
-        
-         dispatch( setUser(await data));
+
+        dispatch(setUser(await data));
       });
-    }
-    console.log(token);
-    
-    if (token !== undefined) {
-      console.log(123);
-      
-     get()
-    }
+  }
+  console.log(token);
 
-    return isLogin ? (
-      <Routes>
-        <Route element={<Header />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/createProduct" element={<CreateProduct />} />
-        </Route>
-        <Route path="/login" element={<Auth />} />
-      </Routes>
-    ) :  (
-      <div>Загрузка</div>
-    )
+  if (token !== undefined) {
+    console.log(123);
 
+    get();
+  }
+
+  return (
+    <Routes>
+      <Route element={<Header />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/createProduct" element={<CreateProduct />} />
+      </Route>
+      <Route path="/login" element={<Auth />} />
+      <Route path="/register" element={<Register />} />
+    </Routes>
+  );
 }
 
 export default App;
