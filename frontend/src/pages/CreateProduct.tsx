@@ -1,28 +1,54 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Box, Typography, MenuItem, TextField } from '@mui/material';
 import { YMaps, Map, Placemark } from '@pbe/react-yandex-maps';
 import axios from 'axios';
 import { useAppSelector } from '../app/hooks/useAppSelector';
 import { baseUrl } from '../app/fetch';
+import { useAppDispatch } from '../app/hooks/useAppDispatch';
+import { setUser } from '../app/store/slice/UserSlice';
 
 const CreateProduct = () => {
-  const userId = useAppSelector((state) => state.user.user!._id);
-
+  const user = useAppSelector((state) => state.user.user);
+  const dispatch = useAppDispatch();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     calculatedRating: 0,
     categories: [],
-    userId: userId,
+    userId: '',
     images: [],
     address: [0, 0], // Используем массив чисел для координат
     advantagesHeaders: [{ header: '', advantages: [{ header: '', svgType: 0 }] }],
   });
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    async function get() {
+      await axios
+        .get(`${baseUrl}/auth`, {
+          headers: {
+            token: token,
+          },
+        })
+        .then(async ({ data }) => {
+          console.log(31);
+
+          dispatch(setUser(await data));
+          setFormData({ ...formData, userId: data._id });
+        });
+    }
+    console.log(token);
+
+    if (token !== undefined) {
+      console.log(123);
+
+      get();
+    }
+  }, []);
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
 
   const defaultState = {
-    center: [54.70456582768237,20.514148358398423],
+    center: [54.70456582768237, 20.514148358398423],
     zoom: 12,
   };
 
@@ -143,9 +169,7 @@ const CreateProduct = () => {
       <Typography variant="h6">Location</Typography>
       <Box>
         <YMaps>
-          <Map defaultState={defaultState} width="100%" height="300px" onClick={handleMapClick}>
-            <Placemark geometry={formData.address} />
-          </Map>
+          <Map defaultState={defaultState} width="100%" height="300px" onClick={handleMapClick} />
         </YMaps>
       </Box>
 
@@ -176,9 +200,16 @@ const CreateProduct = () => {
                   handleAdvantageChange(index, 'advantages', [{ ...subAdvantage, svgType: e.target.value }])
                 }
               >
-                {[0, 1, 2, 3, 4, 5].map((type) => (
-                  <MenuItem key={type} value={type}>
-                    {type}
+                {[
+                  { value: 0, label: <img src="path_to_svg_0" alt="SVG 0" /> },
+                  { value: 1, label: <img src="path_to_svg_1" alt="SVG 1" /> },
+                  { value: 2, label: <img src="path_to_svg_2" alt="SVG 2" /> },
+                  { value: 3, label: <img src="path_to_svg_3" alt="SVG 3" /> },
+                  { value: 4, label: <img src="path_to_svg_4" alt="SVG 4" /> },
+                  { value: 5, label: <img src="path_to_svg_5" alt="SVG 5" /> },
+                ].map((item) => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.label}
                   </MenuItem>
                 ))}
               </TextField>
@@ -204,7 +235,7 @@ const CreateProduct = () => {
           </Button>
         </label>
       </Box>
-      <div className='flex gap-2'>
+      <div className="flex gap-2">
         {formData.images.map((image, index) => (
           <div key={index} style={{ position: 'relative' }}>
             <img
