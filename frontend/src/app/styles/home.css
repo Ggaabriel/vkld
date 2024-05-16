@@ -1,0 +1,257 @@
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+input {
+  all: unset;
+}
+
+.input-wrapper {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+  background: #22333B;
+  border: 2px solid #2b2c37;
+  border-radius: 10px;
+
+  box-shadow: hsla(0, 0%, 0%, 0.1) 0px 20px 25px -5px,
+    #0000000a 0px 10px 10px -5px;
+  transition: all 0.35s ease-out;
+  position: relative;
+  border-radius: 26px;
+}
+
+.input {
+  width: calc(100% - 70px);
+  font: inherit;
+  font-size: 18px;
+  padding: 1rem;
+  
+}
+.input::placeholder {
+  color: #727884;
+}
+
+.input-wrapper:has(input:focus) {
+  border: 2px solid #fff;
+  box-shadow: 0 0 120px #ffffff7a;
+}
+
+.input-wrapper > svg {
+  position: absolute;
+  right: 1rem;
+  width: 28px;
+  flex-shrink: 0;
+  transition: 0.25s;
+}
+
+svg > path {
+  fill: none;
+  stroke: #727884;
+}
+
+.input:focus + svg > path {
+  stroke: none;
+  fill: #fff;
+}
+.input:focus + svg {
+  scale: 1.2;
+}
+
+
+
+
+.backdrop {
+	position: fixed;
+	display: grid;
+  overflow: hidden;
+	place-items: center;
+	width: 100lvw;
+	height: 100lvh;
+
+	filter: blur(2.5lvw) contrast(200%) saturate(200%) brightness(0.7);
+}
+
+.backdrop .shape {
+	position: absolute;
+	aspect-ratio: 1/1;
+	border-radius: 100%;
+}
+
+.backdrop .shape.one {
+	width: 40svw;
+	background: #fff;
+	transform: rotate(90deg) translate(45lvh, 5lvw);
+	animation: shape-one 7s ease-in-out infinite alternate;
+	animation-delay: -2s;
+}
+
+.backdrop .shape.two {
+	width: 25lvw;
+	background: #ffffffcc;
+	transform: rotate(200deg) translate(-35lvh, 12lvw);
+	animation: shape-two 4s ease-in-out infinite alternate;
+	animation-delay: -1s;
+}
+
+.backdrop .shape.three {
+	width: 32svw;
+	background: #ffffffad;
+	transform: rotate(-165deg) translate(24lvh, -32lvw);
+	animation: shape-three 5s ease-in-out infinite alternate;
+	animation-delay: -3.5s;
+}
+
+.backdrop .shape.four {
+	width: 29svw;
+	background: #ffffff8a;
+	transform: rotate(25deg) translate(-16lvh, -19lvw);
+	animation: shape-four 6s ease-in-out infinite alternate;
+	animation-delay: -1.8s;
+}
+
+.backdrop .shape.five {
+	width: 37svw;
+	background: #ffffff4f;
+	transform: rotate(-55deg) translate(30lvh, 26lvw);
+	animation: shape-five 5.5s ease-in-out infinite alternate;
+	animation-delay: -0.4s;
+}
+
+.backdrop .shape.six {
+	width: 24svw;
+	background: #ffffff1a;
+	transform: rotate(120deg) translate(-40lvh, 46lvw);
+	animation: shape-six 9.5s ease-in-out infinite alternate;
+	animation-delay: -7.4s;
+}
+
+.backdrop .shape.seven {
+	width: 31svw;
+	background: #fff;
+	transform: rotate(-55deg) translate(-24lvh, 56lvw);
+	animation: shape-seven 15.5s ease-in-out infinite alternate;
+	animation-delay: -5.7s;
+}
+
+.main {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	gap: 2lvw;
+	align-items: center;
+	background: rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(0.5lvw);
+	border: 2px solid rgba(255, 255, 255, 0.1);
+	border-radius: 10px;
+	padding-inline: 3svw;
+	padding-block: 4svw;
+}
+
+.main h1 {
+	--font-size: 5svw;
+	margin: 0;
+	font-size: var(--font-size);
+	color: white;
+}
+
+.main h2 {
+	--font-size: 5svw;
+	margin: 0;
+	font-size: var(--font-size);
+	color: white;
+	transform-origin: bottom right;
+	animation: wave 1.5s ease-in-out infinite;
+}
+
+@keyframes shape-one {
+	from {
+		transform: rotate(90deg) translate(45lvh, 0);
+	}
+	to {
+		transform: rotate(120deg) translate(-20lvh, 0);
+	}
+}
+
+@keyframes shape-two {
+	from {
+		transform: rotate(200deg) translate(-35lvh, 12lvw);
+	}
+	to {
+		transform: rotate(240deg) translate(-35lvh, 12lvw);
+	}
+}
+
+@keyframes shape-three {
+	from {
+		transform: rotate(-165deg) translate(24lvh, -32lvw);
+	}
+	to {
+		transform: rotate(-100deg) translate(24lvh, -32lvw);
+	}
+}
+
+@keyframes shape-four {
+	from {
+		transform: rotate(25deg) translate(-16lvh, -19lvw);
+	}
+	to {
+		transform: rotate(-20deg) translate(-16lvh, -19lvw);
+	}
+}
+
+@keyframes shape-five {
+	from {
+		transform: rotate(-55deg) translate(30lvh, 26lvw);
+	}
+	to {
+		transform: rotate(-70deg) translate(30lvh, 26lvw);
+	}
+}
+
+@keyframes shape-six {
+	from {
+		transform: rotate(120deg) translate(-40lvh, 46lvw);
+	}
+	to {
+		transform: rotate(95deg) translate(52lvh, 46lvw);
+	}
+}
+
+@keyframes shape-seven {
+	from {
+		transform: rotate(-55deg) translate(-24lvh, 56lvw);
+	}
+	to {
+		transform: rotate(-75deg) translate(-19lvh, -39lvw);
+	}
+}
+
+@keyframes wave {
+	from {
+		transform: rotate(0deg);
+	}
+	20% {
+		transform: rotate(25deg);
+	}
+	40% {
+		transform: rotate(-25deg);
+	}
+	60% {
+		transform: rotate(35deg);
+	}
+	80% {
+		transform: rotate(-35deg);
+	}
+	to {
+		transform: rotate(0deg);
+	}
+}

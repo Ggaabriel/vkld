@@ -4,6 +4,7 @@ import { Pagination } from 'swiper/modules';
 import kld from 'src/app/assets/kld.jpg';
 
 import neiro from 'src/app/assets/neiro.jpg';
+import "src/app/styles/home.css"
 type Props = {};
 
 const Home = (props: Props) => {

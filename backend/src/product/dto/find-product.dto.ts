@@ -36,7 +36,7 @@ export class ProductDto {
   description: string;
 
   @IsNotEmpty()
-  address: number[];
+  address: number[] | string;
 
   @IsNotEmpty()
   @IsNumber()
@@ -46,7 +46,7 @@ export class ProductDto {
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => AdvantagesHeadersDto)
-  advantagesHeaders: AdvantagesHeadersDto[];
+  advantagesHeaders: AdvantagesHeadersDto[] | string;
 
   @IsNotEmpty()
   categories: string[];

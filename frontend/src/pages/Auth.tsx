@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -22,11 +22,11 @@ export default function Auth() {
     password: '',
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e:ChangeEvent<HTMLInputElement>) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
     try {
       const response = await axios.post(`${baseUrl}/auth/login`, loginData);
@@ -41,7 +41,7 @@ export default function Auth() {
 
   const navigate = useNavigate();
   const handleBack = () => {
-    navigate("/");
+    navigate('/');
   };
 
   return (

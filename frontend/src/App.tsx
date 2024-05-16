@@ -14,29 +14,9 @@ import { useAppSelector } from './app/hooks/useAppSelector';
 import Register from './pages/Register';
 
 function App() {
-  const dispatch = useAppDispatch();
-  const { isLogin, user } = useAppSelector((state) => state.user);
-  const token = localStorage.getItem('token');
-  async function get() {
-    await axios
-      .get(`${baseUrl}/auth`, {
-        headers: {
-          token: token,
-        },
-      })
-      .then(async ({ data }) => {
-        console.log(31);
 
-        dispatch(setUser(await data));
-      });
-  }
-  console.log(token);
+  // const { isLogin, user } = useAppSelector((state) => state.user);
 
-  if (token !== undefined) {
-    console.log(123);
-
-    get();
-  }
 
   return (
     <Routes>

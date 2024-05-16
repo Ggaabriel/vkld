@@ -57,6 +57,10 @@ export class ProductController {
     try {
       // Создаем объект с данными нового продукта
       const newProductData: ProductDto = createProductDto;
+      newProductData.advantagesHeaders = JSON.parse(createProductDto.advantagesHeaders as string);
+      newProductData.address = String(createProductDto.address).split(',').map(Number);
+      console.log(newProductData.address);
+
       console.log(createProductDto);
 
       // Если изображения были загружены, сохраняем их пути в данных нового продукта
@@ -69,7 +73,7 @@ export class ProductController {
 
       return newProduct;
     } catch (error) {
-      throw new HttpException('Ошибка при создании продукта', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(`Ошибка при создании продукта: ${error}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

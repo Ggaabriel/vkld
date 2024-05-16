@@ -13,6 +13,10 @@ import Container from '@mui/material/Container';
 import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
 import { Link, useNavigate } from 'react-router-dom';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { baseUrl } from '../app/fetch';
+import axios from 'axios';
+import { useAppDispatch } from '../app/hooks/useAppDispatch';
+import { setUser } from '../app/store/slice/UserSlice';
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
@@ -28,17 +32,30 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 });
 export default function Register() {
-  const navigate = useNavigate()
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
+    const datalog = new FormData(event.currentTarget);
     console.log({
-      email: data.get('email'),
-      password: data.get('password'),
+      login: datalog.get('login'),
+      password: datalog.get('password'),
+      image: datalog.get('image'),
+      name: datalog.get('name'),
     });
+    const { data } = await axios.post(`${baseUrl}/auth/register`, datalog);
+    localStorage.setItem('token', await data.token);
+    const { data: user } = await axios.get(`${baseUrl}/auth`, {
+      headers: {
+        token: data.token,
+      },
+    });
+
+    dispatch(setUser(await user));
+    navigate("/")
   };
   const handleBack = () => {
-    navigate("/");
+    navigate('/');
   };
 
   return (
@@ -68,7 +85,7 @@ export default function Register() {
                 <TextField required fullWidth id="login" label="Логин" name="login" autoComplete="family-name" />
               </Grid>
               <Grid item xs={12}>
-                <TextField required fullWidth id="Имя" label="Имя" name="Имя" autoComplete="Имя" />
+                <TextField required fullWidth id="name" label="Имя" name="name" autoComplete="Имя" />
               </Grid>
               <Grid item xs={12}>
                 <TextField
@@ -90,7 +107,7 @@ export default function Register() {
                   startIcon={<CloudUploadIcon />}
                 >
                   Upload file
-                  <VisuallyHiddenInput type="file" />
+                  <VisuallyHiddenInput type="file" name="image" />
                 </Button>
               </Grid>
             </Grid>

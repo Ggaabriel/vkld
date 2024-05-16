@@ -9,7 +9,32 @@ import { useAppSelector } from '../app/hooks/useAppSelector';
 type Props = {};
 
 const Header = (props: Props) => {
+  const dispatch = useAppDispatch();
   const { isLogin, user } = useAppSelector((state) => state.user);
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    async function get() {
+      await axios
+        .get(`${baseUrl}/auth`, {
+          headers: {
+            token: token,
+          },
+        })
+        .then(async ({ data }) => {
+          console.log(31);
+
+          dispatch(setUser(await data));
+        });
+    }
+    console.log(token);
+
+    if (token !== undefined) {
+      console.log(123);
+
+      get();
+    }
+  }, []);
+
   return (
     <>
       <header className="fixed w-full z-10 text-white bg-[#22333B]">
@@ -27,7 +52,7 @@ const Header = (props: Props) => {
                   <button className="py-2 px-5">+</button>
                 </Link>
                 <Link to={`/user/${user._id}`}>
-                  <button className="py-2 px-5">{user.name}</button>
+                  <img className="w-10 h-full rounded-full" src={`http://localhost:3000/${user.image}`} alt="" />
                 </Link>
               </>
             ) : (
