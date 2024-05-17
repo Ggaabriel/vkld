@@ -12,17 +12,17 @@ import { baseUrl } from './app/fetch';
 import { setUser } from './app/store/slice/UserSlice';
 import { useAppSelector } from './app/hooks/useAppSelector';
 import Register from './pages/Register';
+import Product from './pages/Product';
 
 function App() {
-
   // const { isLogin, user } = useAppSelector((state) => state.user);
-
 
   return (
     <Routes>
       <Route element={<Header />}>
         <Route path="/" element={<Home />} />
         <Route path="/createProduct" element={<CreateProduct />} />
+        <Route path="/product/:id" element={<Product />} />
       </Route>
       <Route path="/login" element={<Auth />} />
       <Route path="/register" element={<Register />} />

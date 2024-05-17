@@ -39,11 +39,28 @@ const Header = (props: Props) => {
     <>
       <header className="fixed w-full z-10 text-white bg-[#22333B]">
         <div className="max-w-[1675px] mx-auto h-[76px] grid grid-cols-12 gap-[20px] items-center ">
-          <h1 className="col-start-1 col-end-3">ЛОГО</h1>
+          <Link to="/">
+            <h1 className="col-start-1 col-end-3">ЛОГО</h1>
+          </Link>
           <ul className="flex gap-6 col-start-3 col-end-11">
-            <li>Памятники архитектуры</li>
-            <li>Рестораны</li>
-            <li>Отели</li>
+            <li>
+              <Link to={`/product?category=Памятники архитектуры`}> Памятники архитектуры</Link>
+            </li>
+            <li>
+              <Link to={`/product?category=Рестораны`}>Рестораны</Link>
+            </li>
+            <li>
+              <Link to={`/product?category=Отели`}>Отели</Link>
+            </li>
+            <li>
+              <Link to={`/product?category=Искусство и история`}>Искусство и история</Link>
+            </li>
+            <li>
+              <Link to={`/product?category=Города и улицы`}>Города и улицы</Link>
+            </li>
+            <li>
+              <Link to={`/product?category=Зоны отдыха  `}> Зоны отдыха</Link>
+            </li>
           </ul>
           <div className="flex gap-5 col-start-11 col-end-13 justify-end">
             {isLogin && user !== null ? (

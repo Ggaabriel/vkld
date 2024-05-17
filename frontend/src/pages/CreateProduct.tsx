@@ -7,10 +7,22 @@ import { baseUrl } from '../app/fetch';
 import { useAppDispatch } from '../app/hooks/useAppDispatch';
 import { setUser } from '../app/store/slice/UserSlice';
 
+
+interface IFormData {
+  title: string;
+  description: string;
+  calculatedRating: any;
+  categories: any;
+  userId: string;
+  images: File[];
+  address: [number, number]; // Используем массив чисел для координат
+  advantagesHeaders: { header: string; advantages: { header: string; svgType: number }[] }[];
+}
+
 const CreateProduct = () => {
   const user = useAppSelector((state) => state.user.user);
   const dispatch = useAppDispatch();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<IFormData>({
     title: '',
     description: '',
     calculatedRating: 0,
@@ -18,8 +30,10 @@ const CreateProduct = () => {
     userId: '',
     images: [],
     address: [0, 0], // Используем массив чисел для координат
-    advantagesHeaders: [{ header: '', advantages: [{ header: '', svgType: 0 }] }],
+    advantagesHeaders: [{ header: '', advantages: [] }], // Изменено: пустой массив преимуществ
   });
+  
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     async function get() {
@@ -30,29 +44,24 @@ const CreateProduct = () => {
           },
         })
         .then(async ({ data }) => {
-          console.log(31);
-
           dispatch(setUser(await data));
           setFormData({ ...formData, userId: data._id });
         });
     }
-    console.log(token);
 
     if (token !== undefined) {
-      console.log(123);
-
       get();
     }
   }, []);
 
-  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   const defaultState = {
     center: [54.70456582768237, 20.514148358398423],
     zoom: 12,
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
       const formDataToSend = new FormData();
@@ -60,13 +69,13 @@ const CreateProduct = () => {
       formDataToSend.append('description', formData.description);
       formDataToSend.append('calculatedRating', formData.calculatedRating);
       formDataToSend.append('advantagesHeaders', JSON.stringify(formData.advantagesHeaders));
-      formDataToSend.append('userId', userId);
-      formDataToSend.append('address', formData.address.join(',')); // Преобразуем координаты в строку
+      formDataToSend.append('userId', user!._id);
+      formDataToSend.append('categories', formData.categories );
+      formDataToSend.append('address', formData.address.join(','));
 
       for (let i = 0; i < formData.images.length; i++) {
         formDataToSend.append('image', formData.images[i]);
       }
-      console.log(formDataToSend.get('address'));
 
       const response = await axios.post(`${baseUrl}/product`, formDataToSend);
       console.log('Product created:', response.data);
@@ -75,30 +84,29 @@ const CreateProduct = () => {
     }
   };
 
-  const handleMapClick = (e) => {
-    // Получаем координаты клика
+  const handleMapClick = (e: any) => {
     const coords = e.get('coords');
-    // Преобразуем координаты в адрес и обновляем состояние формы
     setFormData({
       ...formData,
-      address: [+coords[0], +coords[1]], // Пример: [55.751574, 37.573856]
+      address: [+coords[0], +coords[1]],
     });
   };
 
-  const handleFileInputChange = (event) => {
-    const files = Array.from(event.target.files);
-    setFormData({ ...formData, images: [...formData.images, ...files] }); // Добавляем новые изображения в конец массива
+  const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setFormData({ ...formData, images: [...formData.images, ...files] });
   };
 
   const handleAddAdvantage = () => {
     setFormData({
       ...formData,
-      advantagesHeaders: [...formData.advantagesHeaders, { header: '', advantages: [{ header: '', svgType: 0 }] }],
+      advantagesHeaders: [...formData.advantagesHeaders, { header: '', advantages: [] }], // Изменено: добавлен пустой массив преимуществ
     });
   };
 
-  const handleAdvantageChange = (index, field, value) => {
+  const handleAdvantageChange = (index: number, field: string, value: any) => {
     const updatedAdvantages = [...formData.advantagesHeaders];
+    // @ts-ignore
     updatedAdvantages[index][field] = value;
     setFormData({
       ...formData,
@@ -106,30 +114,38 @@ const CreateProduct = () => {
     });
   };
 
-  const handleImageClick = (index) => {
+  const handleAddSubAdvantage = (index: number) => {
+    const updatedAdvantages = [...formData.advantagesHeaders];
+    updatedAdvantages[index].advantages.push({ header: '', svgType: 0 });
+    setFormData({
+      ...formData,
+      advantagesHeaders: updatedAdvantages,
+    });
+  };
+
+  const handleImageClick = (index: number) => {
     if (selectedImageIndex === index) {
-      // Если выбрано уже выбранное изображение, снимаем выделение
       setSelectedImageIndex(null);
     } else {
       setSelectedImageIndex(index);
     }
   };
 
-  const handleDeleteImage = (index) => {
+  const handleDeleteImage = (index: number) => {
     const updatedImages = [...formData.images];
-    updatedImages.splice(index, 1); // Удаляем изображение из массива по индексу
+    updatedImages.splice(index, 1);
     setFormData({ ...formData, images: updatedImages });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="pt-20">
-      <Typography variant="h6">Product Information</Typography>
-      <Box>
+    <form onSubmit={handleSubmit} className="pt-20 bg-white">
+      <Typography variant="h6">Информация об объекте</Typography>
+      <Box gap={20}>
         <TextField
           required
           fullWidth
           id="title"
-          label="Title"
+          label="Заголовок"
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
         />
@@ -137,39 +153,35 @@ const CreateProduct = () => {
           required
           fullWidth
           id="description"
-          label="Description"
+          label="Описание"
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
         />
         <TextField
           required
           fullWidth
-          id="calculatedRating"
-          label="Calculated Rating"
-          type="number"
-          value={formData.calculatedRating}
-          onChange={(e) => setFormData({ ...formData, calculatedRating: e.target.value })}
-        />
-        <TextField
-          required
-          fullWidth
           id="categories"
-          label="Categories"
+          label="Категории"
           select
           SelectProps={{ multiple: true }}
           value={formData.categories}
           onChange={(e) => setFormData({ ...formData, categories: e.target.value })}
         >
-          <MenuItem value="Category 1">Category 1</MenuItem>
-          <MenuItem value="Category 2">Category 2</MenuItem>
-          <MenuItem value="Category 3">Category 3</MenuItem>
+          <MenuItem value="Искусство и история">Искусство и история</MenuItem>
+          <MenuItem value="Города и улицы">Города и улицы</MenuItem>
+          <MenuItem value="Зоны отдыха">Зоны отдыха</MenuItem>
+          <MenuItem value="Памятники архитектуры">Памятники архитектуры</MenuItem>
+          <MenuItem value="Рестораны">Рестораны</MenuItem>
+          <MenuItem value="Отели">Отели</MenuItem>
         </TextField>
       </Box>
 
-      <Typography variant="h6">Location</Typography>
+      <Typography variant="h6">Точка на карте</Typography>
       <Box>
         <YMaps>
-          <Map defaultState={defaultState} width="100%" height="300px" onClick={handleMapClick} />
+          <Map defaultState={defaultState} width="100%" height="300px" onClick={handleMapClick}>
+            <Placemark geometry={formData.address}/>
+          </Map>
         </YMaps>
       </Box>
 
@@ -177,7 +189,7 @@ const CreateProduct = () => {
         <Box key={index}>
           <TextField
             fullWidth
-            label={`Advantage Header ${index + 1}`}
+            label={`Заголовок преимуществ ${index + 1}`}
             value={advantage.header}
             onChange={(e) => handleAdvantageChange(index, 'header', e.target.value)}
           />
@@ -185,28 +197,35 @@ const CreateProduct = () => {
             <Box key={subIndex}>
               <TextField
                 fullWidth
-                label={`Advantage ${subIndex + 1}`}
+                label={`Преимущество ${subIndex + 1}`}
                 value={subAdvantage.header}
                 onChange={(e) =>
-                  handleAdvantageChange(index, 'advantages', [{ ...subAdvantage, header: e.target.value }])
+                  handleAdvantageChange(index, 'advantages', [
+                    ...advantage.advantages.slice(0, subIndex),
+                    { ...subAdvantage, header: e.target.value },
+                    ...advantage.advantages.slice(subIndex + 1),
+                  ])
                 }
               />
               <TextField
                 fullWidth
                 select
-                label="SVG Type"
+                label="Картинка"
                 value={subAdvantage.svgType}
                 onChange={(e) =>
-                  handleAdvantageChange(index, 'advantages', [{ ...subAdvantage, svgType: e.target.value }])
+                  handleAdvantageChange(index, 'advantages', [
+                    ...advantage.advantages.slice(0, subIndex),
+                    { ...subAdvantage, svgType: e.target.value },
+                    ...advantage.advantages.slice(subIndex + 1),
+                  ])
                 }
               >
                 {[
-                  { value: 0, label: <img src="path_to_svg_0" alt="SVG 0" /> },
-                  { value: 1, label: <img src="path_to_svg_1" alt="SVG 1" /> },
-                  { value: 2, label: <img src="path_to_svg_2" alt="SVG 2" /> },
-                  { value: 3, label: <img src="path_to_svg_3" alt="SVG 3" /> },
-                  { value: 4, label: <img src="path_to_svg_4" alt="SVG 4" /> },
-                  { value: 5, label: <img src="path_to_svg_5" alt="SVG 5" /> },
+                  { value: 0, label: <img src="src/app/assets/icons/0.png" alt="SVG 0" /> },
+                  { value: 1, label: <img src="src/app/assets/icons/1.png" alt="SVG 1" /> },
+                  { value: 2, label: <img src="src/app/assets/icons/2.png" alt="SVG 2" /> },
+                  { value: 3, label: <img src="src/app/assets/icons/3.png" alt="SVG 3" /> },
+                  { value: 4, label: <img src="src/app/assets/icons/4.png" alt="SVG 4" /> },
                 ].map((item) => (
                   <MenuItem key={item.value} value={item.value}>
                     {item.label}
@@ -215,10 +234,11 @@ const CreateProduct = () => {
               </TextField>
             </Box>
           ))}
+          <Button onClick={() => handleAddSubAdvantage(index)}>Добавить Преимущество</Button> {/* Изменено: добавлено кнопка для добавления подпреимущества */}
         </Box>
       ))}
 
-      <Button onClick={handleAddAdvantage}>Add Advantage</Button>
+      <Button onClick={handleAddAdvantage}>Добавить раздел преимущества</Button>
 
       <Box>
         <label htmlFor="file-upload">
@@ -231,7 +251,7 @@ const CreateProduct = () => {
             multiple
           />
           <Button variant="contained" component="span">
-            Upload Images
+            Загрузить изображение
           </Button>
         </label>
       </Box>
@@ -257,7 +277,7 @@ const CreateProduct = () => {
               style={{ position: 'absolute', top: 0, right: 0 }}
               onClick={() => handleDeleteImage(index)}
             >
-              Delete
+              Удалить
             </Button>
           </div>
         ))}
@@ -265,7 +285,7 @@ const CreateProduct = () => {
 
       <Box>
         <Button type="submit" variant="contained" color="primary">
-          Create Product
+          СОздать объект
         </Button>
       </Box>
     </form>

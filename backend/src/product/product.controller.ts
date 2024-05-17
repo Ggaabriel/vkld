@@ -49,7 +49,7 @@ export class ProductController {
       storage,
       fileFilter,
       limits: {
-        fileSize: 1024 * 1024, // 1 MB
+        fileSize: 5 * 1024 * 1024, // 5 MB
       },
     }),
   )
@@ -59,6 +59,7 @@ export class ProductController {
       const newProductData: ProductDto = createProductDto;
       newProductData.advantagesHeaders = JSON.parse(createProductDto.advantagesHeaders as string);
       newProductData.address = String(createProductDto.address).split(',').map(Number);
+      newProductData.categories = String(createProductDto.categories).split(',');
       console.log(newProductData.address);
 
       console.log(createProductDto);
@@ -138,7 +139,53 @@ export class ProductController {
 
       return updatedProduct;
     } catch (error) {
-      throw new HttpException('Ошибка при обновлении продукта', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException('Ошибка при обновлении продукта' + error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Patch(':id/upload')
+  @UseInterceptors(
+    FilesInterceptor('image', 5, {
+      storage,
+      fileFilter,
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5 MB
+      },
+    }),
+  )
+  async addImagesToProduct(
+    @Param('id') productId: string,
+    @UploadedFiles() images: Express.Multer.File[],
+    @UploadedFile() image: Express.Multer.File,
+  ) {
+    try {
+      // Получаем текущий продукт из базы данных
+      const currentProduct = await this.productService.findProductById(productId);
+
+      if (!currentProduct) {
+        throw new HttpException('Продукт не найден', HttpStatus.NOT_FOUND);
+      }
+
+      // Проверяем, были ли загружены изображения
+      if (!images && !image) {
+        throw new HttpException('Изображения не загружены', HttpStatus.BAD_REQUEST);
+      }
+
+      // Получаем пути к загруженным изображениям
+      const imagePaths = images ? images.map((image) => image.path) : [image.path];
+
+      // Добавляем пути к изображениям к массиву изображений текущего продукта
+      currentProduct.images.push(...imagePaths);
+
+      // Сохраняем обновленные данные продукта
+      const updatedProduct = await this.productService.updateProduct(productId, currentProduct);
+
+      return updatedProduct;
+    } catch (error) {
+      throw new HttpException(
+        `Ошибка при добавлении изображений к продукту: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 

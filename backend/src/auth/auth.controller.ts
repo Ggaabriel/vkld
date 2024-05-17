@@ -197,4 +197,22 @@ export class AuthController {
       throw new HttpException('Ошибка при получении пользователя', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  @Get(':id')
+  async getUserById(@Param('id') userId: string) {
+    try {
+      // Вызываем метод для получения пользователя из базы данных по его идентификатору
+      const user = await this.authService.findUserById(userId);
+
+      if (!user) {
+        throw new HttpException('Пользователь не найден', HttpStatus.NOT_FOUND);
+      }
+
+      // Возвращаем найденного пользователя
+      return user;
+    } catch (error) {
+      // Если возникает ошибка при получении пользователя, возвращаем соответствующий статус
+      throw new HttpException('Ошибка при получении пользователя', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }

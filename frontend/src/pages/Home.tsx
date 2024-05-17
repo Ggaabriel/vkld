@@ -1,10 +1,10 @@
-
 import { SwiperSlide, Swiper } from 'swiper/react';
 import { Pagination } from 'swiper/modules';
 import kld from 'src/app/assets/kld.jpg';
 
 import neiro from 'src/app/assets/neiro.jpg';
-import "src/app/styles/home.css"
+import 'src/app/styles/home.css';
+import Products from './Products';
 type Props = {};
 
 const Home = (props: Props) => {
@@ -20,7 +20,7 @@ const Home = (props: Props) => {
                 область
               </h1>
               <div className="input-wrapper">
-                <input className="input" type="text" placeholder="Ask AI Anything" />
+                <input className="input" type="text" placeholder="Поиск объектов" />
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M6.43949 3.83408C6.70916 2.72197 8.29084 2.72197 8.56051 3.83408L9.30252 6.89413C9.3988 7.29118 9.70882 7.6012 10.1059 7.69748L13.1659 8.43949C14.278 8.70916 14.278 10.2908 13.1659 10.5605L10.1059 11.3025C9.70882 11.3988 9.3988 11.7088 9.30252 12.1059L8.56051 15.1659C8.29084 16.278 6.70916 16.278 6.43949 15.1659L5.69748 12.1059C5.6012 11.7088 5.29118 11.3988 4.89413 11.3025L1.83408 10.5605C0.721973 10.2908 0.721972 8.70916 1.83408 8.43949L4.89413 7.69748C5.29118 7.6012 5.6012 7.29118 5.69748 6.89413L6.43949 3.83408Z"
@@ -77,7 +77,7 @@ const Home = (props: Props) => {
           </div>
           <div className="main">
             <h1>Пусто!</h1>
-            <button className=' py-2 px-5'>Повторный запрос</button>
+            <button className=" py-2 px-5">Повторный запрос</button>
           </div>
         </SwiperSlide>
       </Swiper>
@@ -101,6 +101,7 @@ const Home = (props: Props) => {
           </div>
         </div>
       </div>
+      <Products />
     </div>
   );
 };
