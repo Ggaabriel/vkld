@@ -13,6 +13,7 @@ import { setUser } from './app/store/slice/UserSlice';
 import { useAppSelector } from './app/hooks/useAppSelector';
 import Register from './pages/Register';
 import Product from './pages/Product';
+import CategoryList from './pages/CategoryList';
 
 function App() {
   // const { isLogin, user } = useAppSelector((state) => state.user);
@@ -23,6 +24,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/createProduct" element={<CreateProduct />} />
         <Route path="/product/:id" element={<Product />} />
+        <Route path="/product" element={<CategoryList />} />
       </Route>
       <Route path="/login" element={<Auth />} />
       <Route path="/register" element={<Register />} />

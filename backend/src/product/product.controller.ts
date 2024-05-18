@@ -241,4 +241,6 @@ export class ProductController {
       throw new HttpException('Ошибка при получении продукта', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  
 }

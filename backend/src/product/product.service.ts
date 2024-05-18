@@ -29,4 +29,11 @@ export class ProductService {
   async deleteProduct(productId: string) {
     return await this.productModel.findByIdAndDelete(productId).exec();
   }
+  async getProductsByCategory(category: string) {
+    return await this.productModel
+      .find({
+        categories: { $in: [category] }, // Ищем модели, у которых в массиве categories есть заданная категория
+      })
+      .exec();
+  }
 }
