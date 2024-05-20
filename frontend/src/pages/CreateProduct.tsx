@@ -257,9 +257,6 @@ const CreateProduct = () => {
                 <MenuItem value={4}>
                   <img src="src/app/assets/icons/4.png" alt="SVG 4" />
                 </MenuItem>
-                <MenuItem value={5}>
-                  <img src="src/app/assets/icons/5.png" alt="SVG 5" />
-                </MenuItem>
               </TextField>
               <Button variant="contained" color="secondary" onClick={() => handleDeleteSubAdvantage(index, subIndex)}>
                 Удалить преимущество {subIndex + 1}
