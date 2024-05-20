@@ -7,42 +7,84 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { IProduct } from './Products';
 import { Map, Placemark, YMaps } from '@pbe/react-yandex-maps';
 import { useAppSelector } from '../app/hooks/useAppSelector';
-import { Button } from '@mui/material';
+import { Button, TextField, IconButton, Box, Typography, Rating } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { IUser } from '../app/store/slice/UserSlice';
 
-type Props = {};
-
-const Product: React.FC<Props> = () => {
+const Product: React.FC = () => {
   const user = useAppSelector((state) => state.user.user);
   const [product, setProduct] = useState<IProduct | null>(null);
+  const [reviews, setReviews] = useState([]);
+  const [newReview, setNewReview] = useState({ review: '', rating: 0, images: [] });
   const { id } = useParams();
-  const [avtor, setAvtor] = useState();
-  const navigate = useNavigate()
-  async function get() {
+  const [author, setAuthor] = useState<IUser | null>(null);
+  const navigate = useNavigate();
+
+  async function getProductData() {
     try {
       const { data } = await axios.get(`${baseUrl}/product/${id}`);
       setProduct(data);
-      const { data: avtor } = await axios.get(`${baseUrl}/auth/${data.userId}`);
-      setAvtor(avtor);
+      const { data: authorData } = await axios.get(`${baseUrl}/auth/${data.userId}`);
+      setAuthor(authorData);
     } catch (error) {
       console.error('Error fetching product data:', error);
     }
   }
-  const defaultState = {
-    center: [54.70456582768237, 20.514148358398423],
-    zoom: 12,
-  };
+
+  async function getReviews() {
+    try {
+      const { data } = await axios.get(`${baseUrl}/review/byProduct/${id}`);
+      setReviews(data);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    }
+  }
+
   useEffect(() => {
-    get();
+    getProductData();
+    getReviews();
   }, [id]);
-  function handleDeleteProduct(id) {
-    axios.delete(`${baseUrl}/product/${id}`).then(()=>{
-      navigate("/")
-    })
+
+  function handleDeleteProduct(id: string) {
+    axios.delete(`${baseUrl}/product/${id}`).then(() => {
+      navigate('/');
+    });
   }
-  if (!product) {
-    return <div>Loading...</div>;
-  }
-  if (!avtor) {
+
+  const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setNewReview({ ...newReview, images: [...newReview.images, ...files] });
+  };
+
+  const handleSubmitReview = async (event: React.FormEvent) => {
+    event.preventDefault();
+    try {
+      const formData = new FormData();
+      formData.append('review', newReview.review);
+      formData.append('rating', newReview.rating.toString());
+      formData.append('userId', user?._id || '');
+      formData.append('productId', id!);
+      for (let i = 0; i < newReview.images.length; i++) {
+        formData.append('images', newReview.images[i]);
+      }
+      await axios.post(`${baseUrl}/review/create`, formData);
+      setNewReview({ review: '', rating: 0, images: [] });
+      getReviews(); // Refresh reviews after adding a new one
+    } catch (error) {
+      console.error('Error adding review:', error);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    try {
+      await axios.delete(`${baseUrl}/review/${reviewId}`);
+      getReviews(); // Refresh reviews after deletion
+    } catch (error) {
+      console.error('Error deleting review:', error);
+    }
+  };
+
+  if (!product || !author) {
     return <div>Loading...</div>;
   }
 
@@ -68,18 +110,18 @@ const Product: React.FC<Props> = () => {
       <div className="p-8 grid grid-cols-2 text-white">
         <div>
           <span>Создано: {product.createdAt.split('T')[0]}</span>
-          <Link className="flex items-center gap-2" to={`/user/${avtor._id}`}>
-            <img className="w-10 aspect-square rounded-full" src={`http://localhost:3000/${avtor.image}`} alt="" />
-            <p>{avtor.name}</p>
+          <Link className="flex items-center gap-2" to={`/user/${author._id}`}>
+            <img className="w-10 aspect-square rounded-full" src={`http://localhost:3000/${author.image}`} alt="" />
+            <p>{author.name}</p>
           </Link>
-          <h1 className=" font-bold mb-4 text-[#C6AC8F] text-6xl">{product.title}</h1>
-          <p className="mb-4 text-[#EAE0D5] text-4xl">{product.description}</p>
+          <h1 className="font-bold mb-4 text-[#C6AC8F] text-6xl">{product.title}</h1>
+          <p className="mb-4 text-[#EAE0D5] text-xl">{product.description}</p>
         </div>
 
         <div>
           {product.advantagesHeaders.map((advantageHeader, index) => (
             <div key={index} className="mb-4">
-              <h2 className="text-2xl font-semibold mb-2 ">{advantageHeader.header}</h2>
+              <h2 className="text-2xl font-semibold mb-2">{advantageHeader.header}</h2>
               <ul className="grid grid-cols-2">
                 {advantageHeader.advantages.map((advantage, index) => (
                   <li key={index} className="flex items-center mb-1">
@@ -92,22 +134,81 @@ const Product: React.FC<Props> = () => {
           ))}
         </div>
       </div>
+
       <YMaps>
-        <Map defaultState={defaultState} width="100%" height="300px">
+        <Map defaultState={{ center: product.address, zoom: 12 }} width="100%" height="300px">
           <Placemark geometry={product.address} />
         </Map>
       </YMaps>
-      {user?._id === avtor._id && (
-        <Button
-          variant="contained"
-          color="error"
-          size="small"
-          style={{ marginTop:20, display:"block", margin:"0 auto" }}
-          onClick={() => handleDeleteProduct(product._id)}
-        >
-          Удалить   
-        </Button>
+
+      {user?._id === author._id && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => navigate(`/product/edit/${product._id}`)}
+          >
+            Редактировать
+          </Button>
+          <Button variant="contained" color="error" size="small" onClick={() => handleDeleteProduct(product._id)}>
+            Удалить
+          </Button>
+        </div>
       )}
+
+      <div className="mt-8">
+        <Typography className="text-[#EAE0D5]" variant="h6">
+          Отзывы
+        </Typography>
+        {reviews.map((review) => (
+          <Box key={review._id} className="border p-4 mb-4">
+            <Typography variant="body1">{review.review}</Typography>
+            <Rating value={review.rating} readOnly />
+            <Box className="flex gap-2 mt-2">
+              {review.images &&
+                review.images.map((image, index) => (
+                  <img
+                    key={index}
+                    src={`http://localhost:3000/${image}`}
+                    alt={`Review image ${index + 1}`}
+                    className="w-32 h-32 object-cover"
+                  />
+                ))}
+            </Box>
+            {user?._id === review.userId && (
+              <IconButton onClick={() => handleDeleteReview(review._id)}>
+                <DeleteIcon />
+              </IconButton>
+            )}
+          </Box>
+        ))}
+        {localStorage.getItem('token') !== null && (
+          <form onSubmit={handleSubmitReview} className="mt-4">
+            <TextField
+              className="text-[#EAE0D5] placeholder-[#EAE0D5]"
+              fullWidth
+              variant="outlined"
+              label="Добавить отзыв"
+              value={newReview.review}
+              onChange={(e) => setNewReview({ ...newReview, review: e.target.value })}
+              multiline
+              rows={4}
+              required
+              
+            />
+            <Rating
+              value={newReview.rating}
+              onChange={(event, newValue) => setNewReview({ ...newReview, rating: newValue || 0 })}
+              className="mt-2"
+              required
+            />
+            <Button type="submit" variant="contained" color="primary" className="mt-2">
+              Отправить
+            </Button>
+          </form>
+        )}
+      </div>
     </div>
   );
 };

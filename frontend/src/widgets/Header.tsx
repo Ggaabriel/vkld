@@ -37,7 +37,7 @@ const Header = (props: Props) => {
 
   return (
     <>
-      <header className="fixed w-full z-10 text-white bg-[#22333B]">
+      <header className="fixed w-full z-20 text-white bg-[#22333B]">
         <div className="max-w-[1675px] mx-auto h-[76px] grid grid-cols-12 gap-[20px] items-center ">
           <Link to="/">
             <h1 className="col-start-1 col-end-3">ЛОГО</h1>
@@ -69,13 +69,22 @@ const Header = (props: Props) => {
                   <button className="py-2 px-5">+</button>
                 </Link>
                 <Link to={`/user/${user._id}`}>
-                  <img className="w-10 h-full rounded-full" src={`http://localhost:3000/${user.image}`} alt="" />
+                  <img
+                    className="w-10 h-full rounded-full object-cover"
+                    src={`http://localhost:3000/${user.image}`}
+                    alt=""
+                  />
                 </Link>
               </>
             ) : (
-              <Link to="/login">
-                <button className="py-2 px-5">LOG IN</button>
-              </Link>
+              <>
+                <Link to="/login">
+                  <button className="py-2 px-5">Войти</button>
+                </Link>
+                <Link to="/register">
+                  <button className="py-2 px-5">Регистрация</button>
+                </Link>
+              </>
             )}
           </div>
         </div>

@@ -12,6 +12,9 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { baseUrl } from '../app/fetch';
+import Particles from 'react-particles';
+import { loadSlim } from 'tsparticles-slim';
+import { options } from './Register';
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
@@ -44,26 +47,39 @@ export default function Auth() {
     navigate('/');
   };
 
+  const particlesInit = React.useCallback(async (engine) => {
+    console.log(engine);
+    // you can initiate the tsParticles instance (engine) here, adding custom shapes or presets
+    // this loads the tsparticles package bundle, it's the easiest method for getting everything ready
+    // starting from v2 you can add only the features you need reducing the bundle size
+    //await loadFull(engine);
+    await loadSlim(engine);
+  }, []);
+  const particlesLoaded = React.useCallback(async (container) => {
+    await console.log(container);
+  }, []);
+
   return (
     <ThemeProvider theme={defaultTheme}>
+      <Particles id="particles-js" init={particlesInit} loaded={particlesLoaded} options={options} />
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box
           sx={{
-            marginTop: 8,
+            paddingTop: 8,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
           }}
         >
           <Button variant="contained" color="secondary" onClick={handleBack}>
-            Back
+            Назад
           </Button>
           <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
             <LockOutlinedIcon />
           </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign in
+          <Typography className='relative z-20' component="h1" variant="h5">
+            Авторизация
           </Typography>
           <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
             <TextField
@@ -71,7 +87,7 @@ export default function Auth() {
               required
               fullWidth
               id="login"
-              label="Login"
+              label="Логин"
               name="login"
               autoComplete="username"
               autoFocus
@@ -83,7 +99,7 @@ export default function Auth() {
               required
               fullWidth
               name="password"
-              label="Password"
+              label="Пароль"
               type="password"
               id="password"
               autoComplete="current-password"
@@ -91,11 +107,11 @@ export default function Auth() {
               onChange={handleChange}
             />
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-              Sign In
+              Войти
             </Button>
-            <Grid container>
+            <Grid container className='relative z-20'>
               <Grid item>
-                <Link to="/register">{"Don't have an account? Sign Up"}</Link>
+                <Link to="/register">{"Нет аккаунта? Зарегистрируйтесь!"}</Link>
               </Grid>
             </Grid>
           </Box>

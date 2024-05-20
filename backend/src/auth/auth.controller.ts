@@ -23,6 +23,8 @@ import multer = require('multer');
 import * as fs from 'fs';
 import { JwtService } from '@nestjs/jwt';
 import { AuthModel } from './auth.model/auth.model';
+import { ProductService } from 'src/product/product.service';
+import { ReviewService } from 'src/review/review.service';
 
 const storage = multer.diskStorage({
   destination(req, file, cb) {
@@ -47,6 +49,8 @@ const fileFilter = (req, file, cb) => {
 export class AuthController {
   constructor(
     private authService: AuthService,
+    private productService: ProductService,
+    private reviewService: ReviewService,
     private jwtService: JwtService,
   ) {}
 
@@ -136,7 +140,11 @@ export class AuthController {
       // Если изображение было загружено, сохраняем путь к нему в обновленных данных пользователя
       // Если новое изображение было загружено, удаляем старое изображение из хранилища
       if (image && currentUser.image) {
-        fs.unlinkSync(currentUser.image); // Удалить старое изображение
+        try {
+          fs.accessSync(currentUser.image, fs.constants.F_OK);
+          fs.unlinkSync(currentUser.image); // Удалить старое изображение
+        } catch (error) {}
+        console.log('Файл не существует.');
       }
       if (image) {
         updatedUserData.image = image.path;
@@ -147,7 +155,7 @@ export class AuthController {
 
       return updatedUser;
     } catch (error) {
-      throw new HttpException('Ошибка при обновлении пользователя', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException('Ошибка при обновлении пользователя ' + error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
   @Delete()
@@ -161,7 +169,25 @@ export class AuthController {
 
       // Вызываем метод удаления пользователя из сервиса аутентификации
       const currentUser = await this.authService.findUserById(userId);
+
+      //22222222
+      const products = await this.productService.findAllProducts();
+
+      // 2. Для каждого продукта:
+      for (const product of products) {
+        // 2.1 Удалите комментарии для этого продукта
+        await this.reviewService.deleteByProductId(product._id.toString());
+
+        // 2.2 Удалите изображения этого продукта
+        if (product.images && product.images.length > 0) {
+          product.images.forEach((imagePath) => {
+            fs.unlinkSync(imagePath);
+          });
+        }
+      }
+      //22222222
       await this.authService.deleteUserById(userId);
+      await this.productService.deleteAllByUserId(userId);
       console.log(userId);
       if (currentUser.image) {
         fs.unlinkSync(currentUser.image); // Удалить старое изображение

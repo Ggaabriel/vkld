@@ -84,7 +84,7 @@ const Products = (props: Props) => {
               clickable: true,
             }}
             navigation={true}
-            modules={[Pagination, Navigation]}
+       
             className="mySwiper h-full "
           >
               {category.products.map((product) => (
@@ -116,11 +116,11 @@ const Products = (props: Props) => {
               geometry={product.address}
               modules={['geoObject.addon.balloon', 'geoObject.addon.hint']}
               properties={{
-                balloonContentHeader: `<img width="100" src='http://localhost:3000/${product.images[0]}' />`,
+                balloonContentHeader: `<img style="object-fit:cover;" width="100" src='http://localhost:3000/${product.images[0]}' />`,
                 balloonContentBody: `<h2>${product.title}</h2>`,
                 balloonContentFooter: `
             <div>
-       <p>${product.description}</p>
+       <p>${product.description.split(" ").slice(0,30).join(" ")}</p>
        <button onclick="window.location.href='/product/${product._id}'">Подробнее</button>
      </div>
    `,

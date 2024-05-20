@@ -14,6 +14,8 @@ import { useAppSelector } from './app/hooks/useAppSelector';
 import Register from './pages/Register';
 import Product from './pages/Product';
 import CategoryList from './pages/CategoryList';
+import User from './pages/User';
+import EditProduct from './pages/EditProduct';
 
 function App() {
   // const { isLogin, user } = useAppSelector((state) => state.user);
@@ -24,7 +26,9 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/createProduct" element={<CreateProduct />} />
         <Route path="/product/:id" element={<Product />} />
+        <Route path="/product/edit/:id" element={<EditProduct />} />
         <Route path="/product" element={<CategoryList />} />
+        <Route path="/user/:id" element={<User />} />
       </Route>
       <Route path="/login" element={<Auth />} />
       <Route path="/register" element={<Register />} />

@@ -17,6 +17,8 @@ import { baseUrl } from '../app/fetch';
 import axios from 'axios';
 import { useAppDispatch } from '../app/hooks/useAppDispatch';
 import { setUser } from '../app/store/slice/UserSlice';
+import { loadSlim } from 'tsparticles-slim';
+import Particles from 'react-particles';
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
@@ -31,6 +33,116 @@ const VisuallyHiddenInput = styled('input')({
   whiteSpace: 'nowrap',
   width: 1,
 });
+export const options = {
+  particles: {
+    number: {
+      value: 100,
+      density: {
+        enable: true,
+        value_area: 800,
+      },
+    },
+    color: {
+      value: '#252525',
+    },
+    shape: {
+      type: 'circle',
+      stroke: {
+        width: 0,
+        color: '#000000',
+      },
+      polygon: {
+        nb_sides: 5,
+      },
+      image: {
+        src: 'img/github.svg',
+        width: 100,
+        height: 100,
+      },
+    },
+    opacity: {
+      value: 0.5,
+      random: false,
+      anim: {
+        enable: false,
+        speed: 1,
+        opacity_min: 0.1,
+        sync: false,
+      },
+    },
+    size: {
+      value: 3,
+      random: true,
+      anim: {
+        enable: false,
+        speed: 40,
+        size_min: 0.1,
+        sync: false,
+      },
+    },
+    line_linked: {
+      enable: true,
+      distance: 150,
+      color: '#252525',
+      opacity: 0.4,
+      width: 1,
+    },
+    move: {
+      enable: true,
+      speed: 6,
+      direction: 'none',
+      random: false,
+      straight: false,
+      out_mode: 'out',
+      bounce: false,
+      attract: {
+        enable: false,
+        rotateX: 600,
+        rotateY: 1200,
+      },
+    },
+  },
+  interactivity: {
+    detect_on: 'canvas',
+    events: {
+      onhover: {
+        enable: true,
+        mode: 'grab',
+      },
+      onclick: {
+        enable: true,
+        mode: 'push',
+      },
+      resize: true,
+    },
+    modes: {
+      grab: {
+        distance: 140,
+        line_linked: {
+          opacity: 1,
+        },
+      },
+      bubble: {
+        distance: 400,
+        size: 40,
+        duration: 2,
+        opacity: 8,
+        speed: 3,
+      },
+      repulse: {
+        distance: 200,
+        duration: 0.4,
+      },
+      push: {
+        particles_nb: 4,
+      },
+      remove: {
+        particles_nb: 2,
+      },
+    },
+  },
+  retina_detect: true,
+};
 export default function Register() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -52,32 +164,44 @@ export default function Register() {
     });
 
     dispatch(setUser(await user));
-    navigate("/")
+    navigate('/');
   };
   const handleBack = () => {
     navigate('/');
   };
+  const particlesInit = React.useCallback(async (engine) => {
+    console.log(engine);
+    // you can initiate the tsParticles instance (engine) here, adding custom shapes or presets
+    // this loads the tsparticles package bundle, it's the easiest method for getting everything ready
+    // starting from v2 you can add only the features you need reducing the bundle size
+    //await loadFull(engine);
+    await loadSlim(engine);
+  }, []);
+  const particlesLoaded = React.useCallback(async (container) => {
+    await console.log(container);
+  }, []);
 
   return (
     <ThemeProvider theme={defaultTheme}>
+      <Particles id="particles-js" init={particlesInit} loaded={particlesLoaded} options={options} />
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box
           sx={{
-            marginTop: 8,
+            paddingTop: 8,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
           }}
         >
           <Button variant="contained" color="secondary" onClick={handleBack}>
-            Back
+            Назад
           </Button>
           <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
             <LockOutlinedIcon />
           </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign up
+          <Typography className='relative z-20' component="h1" variant="h5">
+            Регистрация
           </Typography>
           <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
@@ -106,17 +230,17 @@ export default function Register() {
                   tabIndex={-1}
                   startIcon={<CloudUploadIcon />}
                 >
-                  Upload file
+                  Загрузить аватар
                   <VisuallyHiddenInput type="file" name="image" />
                 </Button>
               </Grid>
             </Grid>
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-              Sign Up
+              Зарегистрироваться
             </Button>
-            <Grid container justifyContent="flex-end">
+            <Grid className='relative z-20' container justifyContent="flex-end">
               <Grid item>
-                <Link to="/login">Already have an account? Sign in</Link>
+                <Link to="/login">Уже есть аккаунт? Вход</Link>
               </Grid>
             </Grid>
           </Box>

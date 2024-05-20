@@ -12,6 +12,8 @@ import {
   UploadedFiles,
   UseInterceptors,
   UploadedFile,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductModel } from './product.model/product.model';
@@ -78,6 +80,15 @@ export class ProductController {
     }
   }
 
+  @Get(':id/all')
+  async getAll(@Param('id') userId: string) {
+    try {
+      return await this.productService.getAllProductsByUserId(userId);
+    } catch (error) {
+      throw new HttpException(`Ошибка при получении продуктов: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   @Patch(':id')
   @UseInterceptors(
     FileInterceptor('image', {
@@ -93,9 +104,14 @@ export class ProductController {
     @Body() updateProductDto,
     @UploadedFiles() images: Express.Multer.File[],
     @UploadedFile() image: Express.Multer.File,
-    @Body('imageIndex') imageIndex: number,
+    @Body('imageIndex') imageIndex?: number,
   ) {
     try {
+      const newProductData: ProductModel = updateProductDto;
+      newProductData.advantagesHeaders = JSON.parse(updateProductDto.advantagesHeaders as string);
+      newProductData.address = String(updateProductDto.address).split(',').map(Number);
+      newProductData.categories = String(updateProductDto.categories).split(',');
+
       // Получаем текущий продукт из базы данных
       const currentProduct = await this.productService.findProductById(productId);
 
@@ -104,7 +120,7 @@ export class ProductController {
       }
 
       // Создаем объект с обновленными данными продукта
-      const updatedProductData: Partial<ProductModel> = {};
+      const updatedProductData: Partial<ProductModel> = newProductData;
 
       // Перебираем все поля в DTO и добавляем их в объект с обновленными данными,
       // если они определены и не равны undefined
@@ -117,21 +133,22 @@ export class ProductController {
       // Если изображения были загружены, сохраняем пути к ним в обновленных данных продукта
       if (images && images.length > 0) {
         updatedProductData.images = images.map((image) => image.path);
+
+        // Если изображение было загружено, удаляем старые изображения из хранилища
+        currentProduct.images.forEach((oldImagePath) => {
+          fs.unlinkSync(oldImagePath); // Удалить старое изображение
+        });
       } else if (image) {
         // Если указан индекс изображения, заменяем конкретное изображение
         if (imageIndex !== undefined && imageIndex >= 0 && imageIndex < currentProduct.images.length) {
           currentProduct.images[imageIndex] = image.path;
           updatedProductData.images = currentProduct.images;
-        } else {
+        } else if (imageIndex !== undefined) {
           throw new HttpException('Недопустимый индекс изображения', HttpStatus.BAD_REQUEST);
+        } else {
+          // Если imageIndex не указан, добавляем новое изображение
+          updatedProductData.images = [...currentProduct.images, image.path];
         }
-      }
-
-      // Если изображение было загружено, удаляем старые изображения из хранилища
-      if (images && currentProduct.images.length > 0) {
-        currentProduct.images.forEach((oldImagePath) => {
-          fs.unlinkSync(oldImagePath); // Удалить старое изображение
-        });
       }
 
       // Обновляем продукт в базе данных
@@ -139,7 +156,7 @@ export class ProductController {
 
       return updatedProduct;
     } catch (error) {
-      throw new HttpException('Ошибка при обновлении продукта' + error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException('Ошибка при обновлении продукта: ' + error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -211,16 +228,29 @@ export class ProductController {
   }
 
   @Get()
-  async getProducts() {
+  async getProducts(@Query('category') category: string) {
     try {
-      // Получаем список всех продуктов из базы данных
-      const products = await this.productService.findAllProducts();
-
-      // Возвращаем список всех продуктов
+      // Если параметр 'category' передан, получаем продукты по категории
+      if (category) {
+        const products = await this.productService.getProductsByCategory(category);
+        return products;
+      } else {
+        // Иначе, получаем все продукты
+        const products = await this.productService.findAllProducts();
+        return products;
+      }
+    } catch (error) {
+      throw new HttpException(`Ошибка при получении продуктов: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  @Get('search') // Создайте endpoint /product/search
+  async searchProducts(@Query('title') title: string) {
+    try {
+      // Используйте сервис для поиска продуктов по названию
+      const products = await this.productService.searchProducts(title);
       return products;
     } catch (error) {
-      // Если возникает ошибка при получении списка продуктов, возвращаем соответствующий статус
-      throw new HttpException('Ошибка при получении списка продуктов', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(`Ошибка при поиске продуктов: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -238,9 +268,34 @@ export class ProductController {
       return product;
     } catch (error) {
       // Если возникает ошибка при получении продукта, возвращаем соответствующий статус
-      throw new HttpException('Ошибка при получении продукта', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException('Ошибка при получении продукта ' + error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  
+  @Delete(':id/image/:index')
+  async deleteProductImage(@Param('id') productId: string, @Param('index', ParseIntPipe) imageIndex: number) {
+    try {
+      // Получаем текущий продукт из базы данных
+      const currentProduct = await this.productService.findProductById(productId);
+
+      if (!currentProduct) {
+        throw new HttpException('Продукт не найден', HttpStatus.NOT_FOUND);
+      }
+
+      if (imageIndex < 0 || imageIndex >= currentProduct.images.length) {
+        throw new HttpException('Недопустимый индекс изображения', HttpStatus.BAD_REQUEST);
+      }
+
+      // Удаляем изображение
+      const [removedImage] = currentProduct.images.splice(imageIndex, 1);
+      fs.unlinkSync(removedImage);
+
+      // Сохраняем изменения в базе данных
+      const updatedProduct = await this.productService.updateProduct(productId, currentProduct);
+
+      return updatedProduct;
+    } catch (error) {
+      throw new HttpException(`Ошибка при удалении изображения: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }

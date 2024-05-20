@@ -4,10 +4,14 @@ import { Model } from 'mongoose';
 
 import { ProductDto } from './dto/find-product.dto';
 import { ProductModel } from './product.model/product.model';
+import { ReviewModel } from 'src/review/review.model/review.model';
 
 @Injectable()
 export class ProductService {
-  constructor(@InjectModel(ProductModel.name) private productModel: Model<ProductModel>) {}
+  constructor(
+    @InjectModel(ProductModel.name) private productModel: Model<ProductModel>,
+    @InjectModel(ReviewModel.name) private reviewModel: Model<ReviewModel>,
+  ) {}
 
   async createProduct(productDto: ProductDto) {
     const newProduct = new this.productModel(productDto);
@@ -29,11 +33,21 @@ export class ProductService {
   async deleteProduct(productId: string) {
     return await this.productModel.findByIdAndDelete(productId).exec();
   }
+  async deleteAllByUserId(userId: string) {
+    await this.productModel.deleteMany({ userId: userId }).exec();
+  }
   async getProductsByCategory(category: string) {
     return await this.productModel
       .find({
         categories: { $in: [category] }, // Ищем модели, у которых в массиве categories есть заданная категория
       })
       .exec();
+  }
+  async getAllProductsByUserId(userId: string) {
+    return await this.productModel.find({ userId: userId }).exec();
+  }
+  async searchProducts(title: string): Promise<ProductModel[]> {
+    // Используйте Mongoose для выполнения запроса поиска
+    return await this.productModel.find({ title: { $regex: title, $options: 'i' } }).exec();
   }
 }

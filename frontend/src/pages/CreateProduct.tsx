@@ -6,7 +6,7 @@ import { useAppSelector } from '../app/hooks/useAppSelector';
 import { baseUrl } from '../app/fetch';
 import { useAppDispatch } from '../app/hooks/useAppDispatch';
 import { setUser } from '../app/store/slice/UserSlice';
-
+import { useNavigate } from 'react-router-dom';
 
 interface IFormData {
   title: string;
@@ -15,13 +15,14 @@ interface IFormData {
   categories: any;
   userId: string;
   images: File[];
-  address: [number, number]; // Используем массив чисел для координат
+  address: [number, number];
   advantagesHeaders: { header: string; advantages: { header: string; svgType: number }[] }[];
 }
 
 const CreateProduct = () => {
   const user = useAppSelector((state) => state.user.user);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<IFormData>({
     title: '',
     description: '',
@@ -29,10 +30,9 @@ const CreateProduct = () => {
     categories: [],
     userId: '',
     images: [],
-    address: [0, 0], // Используем массив чисел для координат
-    advantagesHeaders: [{ header: '', advantages: [] }], // Изменено: пустой массив преимуществ
+    address: [0, 0],
+    advantagesHeaders: [{ header: '', advantages: [] }],
   });
-  
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -70,15 +70,17 @@ const CreateProduct = () => {
       formDataToSend.append('calculatedRating', formData.calculatedRating);
       formDataToSend.append('advantagesHeaders', JSON.stringify(formData.advantagesHeaders));
       formDataToSend.append('userId', user!._id);
-      formDataToSend.append('categories', formData.categories );
+      formDataToSend.append('categories', formData.categories);
       formDataToSend.append('address', formData.address.join(','));
 
       for (let i = 0; i < formData.images.length; i++) {
         formDataToSend.append('image', formData.images[i]);
       }
 
-      const response = await axios.post(`${baseUrl}/product`, formDataToSend);
-      console.log('Product created:', response.data);
+      const response = await axios.post(`${baseUrl}/product`, formDataToSend).then(() => {
+        navigate('/');
+      });
+     
     } catch (error) {
       console.error('Error creating product:', error);
     }
@@ -92,21 +94,27 @@ const CreateProduct = () => {
     });
   };
 
-  const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>, index: number | null = null) => {
     const files = Array.from(event.target.files || []);
-    setFormData({ ...formData, images: [...formData.images, ...files] });
+    if (index !== null && selectedImageIndex !== null) {
+      const updatedImages = [...formData.images];
+      updatedImages[selectedImageIndex] = files[0]; // Replace the selected image
+      setFormData({ ...formData, images: updatedImages });
+      setSelectedImageIndex(null); // Reset selected image index
+    } else {
+      setFormData({ ...formData, images: [...formData.images, ...files] });
+    }
   };
 
   const handleAddAdvantage = () => {
     setFormData({
       ...formData,
-      advantagesHeaders: [...formData.advantagesHeaders, { header: '', advantages: [] }], // Изменено: добавлен пустой массив преимуществ
+      advantagesHeaders: [...formData.advantagesHeaders, { header: '', advantages: [] }],
     });
   };
 
   const handleAdvantageChange = (index: number, field: string, value: any) => {
     const updatedAdvantages = [...formData.advantagesHeaders];
-    // @ts-ignore
     updatedAdvantages[index][field] = value;
     setFormData({
       ...formData,
@@ -123,12 +131,26 @@ const CreateProduct = () => {
     });
   };
 
+  const handleDeleteAdvantageHeader = (index: number) => {
+    const updatedAdvantages = [...formData.advantagesHeaders];
+    updatedAdvantages.splice(index, 1);
+    setFormData({
+      ...formData,
+      advantagesHeaders: updatedAdvantages,
+    });
+  };
+
+  const handleDeleteSubAdvantage = (headerIndex: number, advantageIndex: number) => {
+    const updatedAdvantages = [...formData.advantagesHeaders];
+    updatedAdvantages[headerIndex].advantages.splice(advantageIndex, 1);
+    setFormData({
+      ...formData,
+      advantagesHeaders: updatedAdvantages,
+    });
+  };
+
   const handleImageClick = (index: number) => {
-    if (selectedImageIndex === index) {
-      setSelectedImageIndex(null);
-    } else {
-      setSelectedImageIndex(index);
-    }
+    setSelectedImageIndex(index);
   };
 
   const handleDeleteImage = (index: number) => {
@@ -140,7 +162,7 @@ const CreateProduct = () => {
   return (
     <form onSubmit={handleSubmit} className="pt-20 bg-white">
       <Typography variant="h6">Информация об объекте</Typography>
-      <Box gap={20}>
+      <Box className="flex flex-col gap-5">
         <TextField
           required
           fullWidth
@@ -180,13 +202,13 @@ const CreateProduct = () => {
       <Box>
         <YMaps>
           <Map defaultState={defaultState} width="100%" height="300px" onClick={handleMapClick}>
-            <Placemark geometry={formData.address}/>
+            <Placemark geometry={formData.address} />
           </Map>
         </YMaps>
       </Box>
 
       {formData.advantagesHeaders.map((advantage, index) => (
-        <Box key={index}>
+        <Box key={index} className="flex flex-col gap-5">
           <TextField
             fullWidth
             label={`Заголовок преимуществ ${index + 1}`}
@@ -194,7 +216,7 @@ const CreateProduct = () => {
             onChange={(e) => handleAdvantageChange(index, 'header', e.target.value)}
           />
           {advantage.advantages.map((subAdvantage, subIndex) => (
-            <Box key={subIndex}>
+            <Box key={subIndex} className="flex flex-col gap-5">
               <TextField
                 fullWidth
                 label={`Преимущество ${subIndex + 1}`}
@@ -220,74 +242,82 @@ const CreateProduct = () => {
                   ])
                 }
               >
-                {[
-                  { value: 0, label: <img src="src/app/assets/icons/0.png" alt="SVG 0" /> },
-                  { value: 1, label: <img src="src/app/assets/icons/1.png" alt="SVG 1" /> },
-                  { value: 2, label: <img src="src/app/assets/icons/2.png" alt="SVG 2" /> },
-                  { value: 3, label: <img src="src/app/assets/icons/3.png" alt="SVG 3" /> },
-                  { value: 4, label: <img src="src/app/assets/icons/4.png" alt="SVG 4" /> },
-                ].map((item) => (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.label}
-                  </MenuItem>
-                ))}
+                <MenuItem value={0}>
+                  <img src="src/app/assets/icons/0.png" alt="SVG 0" />
+                </MenuItem>
+                <MenuItem value={1}>
+                  <img src="src/app/assets/icons/1.png" alt="SVG 1" />
+                </MenuItem>
+                <MenuItem value={2}>
+                  <img src="src/app/assets/icons/2.png" alt="SVG 2" />
+                </MenuItem>
+                <MenuItem value={3}>
+                  <img src="src/app/assets/icons/3.png" alt="SVG 3" />
+                </MenuItem>
+                <MenuItem value={4}>
+                  <img src="src/app/assets/icons/4.png" alt="SVG 4" />
+                </MenuItem>
+                <MenuItem value={5}>
+                  <img src="src/app/assets/icons/5.png" alt="SVG 5" />
+                </MenuItem>
               </TextField>
+              <Button variant="contained" color="secondary" onClick={() => handleDeleteSubAdvantage(index, subIndex)}>
+                Удалить преимущество {subIndex + 1}
+              </Button>
             </Box>
           ))}
-          <Button onClick={() => handleAddSubAdvantage(index)}>Добавить Преимущество</Button> {/* Изменено: добавлено кнопка для добавления подпреимущества */}
+          <Button variant="contained" color="primary" onClick={() => handleAddSubAdvantage(index)}>
+            Добавить преимущество
+          </Button>
+          <Button variant="contained" color="secondary" onClick={() => handleDeleteAdvantageHeader(index)}>
+            Удалить заголовок преимуществ {index + 1}
+          </Button>
         </Box>
       ))}
+      <Button variant="contained" color="primary" onClick={handleAddAdvantage}>
+        Добавить заголовок преимуществ
+      </Button>
 
-      <Button onClick={handleAddAdvantage}>Добавить раздел преимущества</Button>
-
-      <Box>
-        <label htmlFor="file-upload">
-          <input
-            id="file-upload"
-            type="file"
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={handleFileInputChange}
-            multiple
-          />
-          <Button variant="contained" component="span">
-            Загрузить изображение
-          </Button>
-        </label>
-      </Box>
-      <div className="flex gap-2">
+      <Typography variant="h6">Изображения</Typography>
+      <input
+        type="file"
+        accept="image/*"
+        multiple={selectedImageIndex === null}
+        onChange={(e) => handleFileInputChange(e, selectedImageIndex)}
+      />
+      <Box className="flex flex-wrap gap-5 mt-5">
         {formData.images.map((image, index) => (
-          <div key={index} style={{ position: 'relative' }}>
-            <img
-              src={URL.createObjectURL(image)}
-              alt={`Image ${index}`}
-              style={{
-                maxWidth: '100px',
-                maxHeight: '100px',
-                marginRight: '10px',
-                border: selectedImageIndex === index ? '2px solid blue' : 'none',
-                cursor: 'pointer',
-              }}
-              onClick={() => handleImageClick(index)}
-            />
-            <Button
-              variant="contained"
-              color="error"
-              size="small"
-              style={{ position: 'absolute', top: 0, right: 0 }}
-              onClick={() => handleDeleteImage(index)}
-            >
-              Удалить
-            </Button>
-          </div>
+          <Box
+            key={index}
+            className={`border ${
+              selectedImageIndex === index ? 'border-blue-500' : 'border-gray-300'
+            } p-2 cursor-pointer`}
+            onClick={() => handleImageClick(index)}
+          >
+            <img src={URL.createObjectURL(image)} alt={`Image ${index + 1}`} className="w-32 h-32 object-cover" />
+            {selectedImageIndex === index && (
+              <>
+                <Button variant="contained" color="secondary" onClick={() => handleDeleteImage(index)}>
+                  Удалить изображение
+                </Button>
+                <Button variant="contained" color="primary" component="label">
+                  Заменить изображение
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(e) => handleFileInputChange(e, index)}
+                  />
+                </Button>
+              </>
+            )}
+          </Box>
         ))}
-      </div>
-
-      <Box>
-        <Button type="submit" variant="contained" color="primary">
-          СОздать объект
-        </Button>
       </Box>
+
+      <Button type="submit" variant="contained" color="primary" className="mt-5">
+        Создать продукт
+      </Button>
     </form>
   );
 };
