@@ -72,7 +72,6 @@ const Home = (props: Props) => {
 
   return (
     <div>
-      {products.length < 0 && (
         <div className="input-wrapper mx-auto z-10 relative top-44">
           <Autocomplete
             className="w-full"
@@ -127,7 +126,6 @@ const Home = (props: Props) => {
             }}
           />
         </div>
-      )}
 
       <Swiper pagination={true} loop={true} modules={[Pagination]} className="mySwiper h-[90vh] w-full text-white ">
         {products.length > 0 ? (
