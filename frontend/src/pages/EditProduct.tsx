@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Box, Typography, MenuItem, TextField } from '@mui/material';
+import { Button, Box, Typography, MenuItem, TextField, ThemeProvider, createTheme } from '@mui/material';
 import { YMaps, Map, Placemark } from '@pbe/react-yandex-maps';
 import axios from 'axios';
 import { useAppSelector } from '../app/hooks/useAppSelector';
@@ -18,6 +18,17 @@ interface IFormData {
   address: [number, number];
   advantagesHeaders: { header: string; advantages: { header: string; svgType: number }[] }[];
 }
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#22333B', // Цвет для кнопок "Добавить"
+    },
+    secondary: {
+      main: '#C6AC8F', // Цвет для кнопок "Удалить"
+    },
+  },
+});
 
 const EditProduct = () => {
   const { id } = useParams<{ id: string }>();
@@ -184,179 +195,181 @@ const EditProduct = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="pt-20 bg-white ">
-      <Typography className="py-5" variant="h6">
-        Информация об объекте
-      </Typography>
-      <Box className="flex flex-col gap-5">
-        <TextField
-          required
-          fullWidth
-          id="title"
-          label="Заголовок"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-        />
-        <TextField
-          required
-          fullWidth
-          id="description"
-          label="Описание"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-        />
-        <TextField
-          required
-          fullWidth
-          id="categories"
-          label="Категории"
-          select
-          SelectProps={{ multiple: true }}
-          value={formData.categories}
-          onChange={(e) => setFormData({ ...formData, categories: e.target.value })}
-        >
-          <MenuItem value="Искусство и история">Искусство и история</MenuItem>
-          <MenuItem value="Города и улицы">Города и улицы</MenuItem>
-          <MenuItem value="Зоны отдыха">Зоны отдыха</MenuItem>
-          <MenuItem value="Памятники архитектуры">Памятники архитектуры</MenuItem>
-          <MenuItem value="Рестораны">Рестораны</MenuItem>
-          <MenuItem value="Отели">Отели</MenuItem>
-        </TextField>
-      </Box>
-
-      <Typography variant="h6">Точка на карте</Typography>
-      <Box>
-        <YMaps>
-          <Map defaultState={defaultState} width="100%" height="300px" onClick={handleMapClick}>
-            <Placemark geometry={formData.address} />
-          </Map>
-        </YMaps>
-      </Box>
-
-      {formData.advantagesHeaders.map((advantage, advantageIndex) => (
-        <Box className="flex flex-col gap-5" key={advantageIndex}>
+    <ThemeProvider theme={theme}>
+      <form onSubmit={handleSubmit} className="pt-20 bg-white">
+        <Typography className="py-5" variant="h6">
+          Информация об объекте
+        </Typography>
+        <Box className="flex flex-col gap-5">
           <TextField
+            required
             fullWidth
-            label={`Заголовок преимуществ ${advantageIndex + 1}`}
-            value={advantage.header}
-            onChange={(e) => handleAdvantageChange(advantageIndex, 'header', e.target.value)}
+            id="title"
+            label="Заголовок"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           />
-          {advantage.advantages.map((subAdvantage, subAdvantageIndex) => (
-            <Box key={subAdvantageIndex} className="flex flex-col gap-5">
-              <TextField
-                fullWidth
-                label={`Преимущество ${subAdvantageIndex + 1}`}
-                value={subAdvantage.header}
-                onChange={(e) =>
-                  handleAdvantageChange(advantageIndex, 'advantages', [
-                    ...advantage.advantages.slice(0, subAdvantageIndex),
-                    { ...subAdvantage, header: e.target.value },
-                    ...advantage.advantages.slice(subAdvantageIndex + 1),
-                  ])
-                }
-              />
-              <TextField
-                fullWidth
-                select
-                label="Картинка"
-                value={subAdvantage.svgType}
-                onChange={(e) =>
-                  handleAdvantageChange(advantageIndex, 'advantages', [
-                    ...advantage.advantages.slice(0, subAdvantageIndex),
-                    { ...subAdvantage, svgType: parseInt(e.target.value) },
-                    ...advantage.advantages.slice(subAdvantageIndex + 1),
-                  ])
-                }
-              >
-                {[
-                  { value: 0, label: <img src="/src/app/assets/icons/0.png" alt="SVG 0" /> },
-                  { value: 1, label: <img src="/src/app/assets/icons/1.png" alt="SVG 1" /> },
-                  { value: 2, label: <img src="/src/app/assets/icons/2.png" alt="SVG 2" /> },
-                  { value: 3, label: <img src="/src/app/assets/icons/3.png" alt="SVG 3" /> },
-                  { value: 4, label: <img src="/src/app/assets/icons/4.png" alt="SVG 4" /> },
-                ].map((item) => (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-              <Button
-                onClick={() => handleDeleteAdvantage(advantageIndex, subAdvantageIndex)}
-                variant="outlined"
-                color="error"
-              >
-                Удалить Преимущество
-              </Button>
-            </Box>
-          ))}
-          <Button onClick={() => handleAddSubAdvantage(advantageIndex)}>Добавить Преимущество</Button>
-          <Button
-            onClick={() => {
-              const updatedAdvantages = [...formData.advantagesHeaders];
-              updatedAdvantages.splice(advantageIndex, 1);
-              setFormData((prev) => ({
-                ...prev,
-                advantagesHeaders: updatedAdvantages,
-              }));
-            }}
-            variant="outlined"
-            color="error"
+          <TextField
+            required
+            fullWidth
+            id="description"
+            label="Описание"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          />
+          <TextField
+            required
+            fullWidth
+            id="categories"
+            label="Категории"
+            select
+            SelectProps={{ multiple: true }}
+            value={formData.categories}
+            onChange={(e) => setFormData({ ...formData, categories: e.target.value })}
           >
-            Удалить раздел преимущества
-          </Button>
+            <MenuItem value="Искусство и история">Искусство и история</MenuItem>
+            <MenuItem value="Города и улицы">Города и улицы</MenuItem>
+            <MenuItem value="Зоны отдыха">Зоны отдыха</MenuItem>
+            <MenuItem value="Памятники архитектуры">Памятники архитектуры</MenuItem>
+            <MenuItem value="Рестораны">Рестораны</MenuItem>
+            <MenuItem value="Отели">Отели</MenuItem>
+          </TextField>
         </Box>
-      ))}
 
-      <Button onClick={handleAddAdvantage}>Добавить раздел преимущества</Button>
+        <Typography variant="h6">Точка на карте</Typography>
+        <Box>
+          <YMaps>
+            <Map defaultState={defaultState} width="100%" height="300px" onClick={handleMapClick}>
+              <Placemark geometry={formData.address} />
+            </Map>
+          </YMaps>
+        </Box>
 
-      <Box>
-        <label htmlFor="file-upload">
-          <input
-            id="file-upload"
-            type="file"
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={handleFileInputChange}
-          />
-          <Button variant="contained" component="span">
-            Загрузить изображение
-          </Button>
-        </label>
-      </Box>
-      <div className="flex gap-2">
-        {formData.images.map((image, index) => (
-          <div key={index} style={{ position: 'relative' }}>
-            <img
-              src={image.path ? 'http://localhost:3000/' + image.path : URL.createObjectURL(image)}
-              alt={`Image ${index}`}
-              style={{
-                maxWidth: '100px',
-                maxHeight: '100px',
-                marginRight: '10px',
-                border: selectedImageIndex === index ? '2px solid blue' : 'none',
-                cursor: 'pointer',
-              }}
-              onClick={() => handleImageClick(index)}
+        {formData.advantagesHeaders.map((advantage, advantageIndex) => (
+          <Box className="flex flex-col gap-5" key={advantageIndex}>
+            <TextField
+              fullWidth
+              label={`Заголовок преимуществ ${advantageIndex + 1}`}
+              value={advantage.header}
+              onChange={(e) => handleAdvantageChange(advantageIndex, 'header', e.target.value)}
             />
+            {advantage.advantages.map((subAdvantage, subAdvantageIndex) => (
+              <Box key={subAdvantageIndex} className="flex flex-col gap-5">
+                <TextField
+                  fullWidth
+                  label={`Преимущество ${subAdvantageIndex + 1}`}
+                  value={subAdvantage.header}
+                  onChange={(e) =>
+                    handleAdvantageChange(advantageIndex, 'advantages', [
+                      ...advantage.advantages.slice(0, subAdvantageIndex),
+                      { ...subAdvantage, header: e.target.value },
+                      ...advantage.advantages.slice(subAdvantageIndex + 1),
+                    ])
+                  }
+                />
+                <TextField
+                  fullWidth
+                  select
+                  label="Картинка"
+                  value={subAdvantage.svgType}
+                  onChange={(e) =>
+                    handleAdvantageChange(advantageIndex, 'advantages', [
+                      ...advantage.advantages.slice(0, subAdvantageIndex),
+                      { ...subAdvantage, svgType: parseInt(e.target.value) },
+                      ...advantage.advantages.slice(subAdvantageIndex + 1),
+                    ])
+                  }
+                >
+                  {[
+                    { value: 0, label: <img src="/src/app/assets/icons/0.png" alt="SVG 0" /> },
+                    { value: 1, label: <img src="/src/app/assets/icons/1.png" alt="SVG 1" /> },
+                    { value: 2, label: <img src="/src/app/assets/icons/2.png" alt="SVG 2" /> },
+                    { value: 3, label: <img src="/src/app/assets/icons/3.png" alt="SVG 3" /> },
+                    { value: 4, label: <img src="/src/app/assets/icons/4.png" alt="SVG 4" /> },
+                  ].map((item) => (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <Button
+                  onClick={() => handleDeleteAdvantage(advantageIndex, subAdvantageIndex)}
+                  variant="contained"
+                  color="error"
+                >
+                  Удалить Преимущество
+                </Button>
+              </Box>
+            ))}
+            <Button variant="contained" onClick={() => handleAddSubAdvantage(advantageIndex)}>Добавить Преимущество</Button>
             <Button
+              onClick={() => {
+                const updatedAdvantages = [...formData.advantagesHeaders];
+                updatedAdvantages.splice(advantageIndex, 1);
+                setFormData((prev) => ({
+                  ...prev,
+                  advantagesHeaders: updatedAdvantages,
+                }));
+              }}
               variant="contained"
               color="error"
-              size="small"
-              style={{ position: 'absolute', top: 0, right: 0 }}
-              onClick={() => handleDeleteImage(index)}
             >
-              Удалить
+              Удалить раздел преимущества
             </Button>
-          </div>
+          </Box>
         ))}
-      </div>
 
-      <Box>
-        <Button type="submit" variant="contained" color="primary">
-          Обновить объект
-        </Button>
-      </Box>
-    </form>
+        <Button  onClick={handleAddAdvantage}>Добавить раздел преимущества</Button>
+
+        <Box>
+          <label htmlFor="file-upload">
+            <input
+              id="file-upload"
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileInputChange}
+            />
+            <Button variant="contained" component="span">
+              Загрузить изображение
+            </Button>
+          </label>
+        </Box>
+        <div className="flex gap-2">
+          {formData.images.map((image, index) => (
+            <div key={index} style={{ position: 'relative' }}>
+              <img
+                src={image.path ? 'http://localhost:3000/' + image.path : URL.createObjectURL(image)}
+                alt={`Image ${index}`}
+                style={{
+                  maxWidth: '100px',
+                  maxHeight: '100px',
+                  marginRight: '10px',
+                  border: selectedImageIndex === index ? '2px solid blue' : 'none',
+                  cursor: 'pointer',
+                }}
+                onClick={() => handleImageClick(index)}
+              />
+              <Button
+                variant="contained"
+                color="error"
+                size="small"
+                style={{ position: 'absolute', top: 0, right: 0 }}
+                onClick={() => handleDeleteImage(index)}
+              >
+                Удалить
+              </Button>
+            </div>
+          ))}
+        </div>
+
+        <Box>
+          <Button type="submit" variant="contained" color="primary">
+            Обновить объект
+          </Button>
+        </Box>
+      </form>
+    </ThemeProvider>
   );
 };
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { styled } from '@mui/material/styles';
+import { ThemeProvider, createTheme, styled } from '@mui/material/styles';
 import axios from 'axios';
 import { baseUrl } from '../app/fetch';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -29,7 +29,16 @@ const User = (props: Props) => {
   const params = useParams();
   const [user, setUser2] = useState();
   const [userProducts, setUserProducts] = useState([]);
-
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: '#22333B', // Цвет для кнопок "Добавить"
+      },
+      secondary: {
+        main: '#C6AC8F', // Цвет для кнопок "Удалить"
+      },
+    },
+  });
   useEffect(() => {
     async function getUserData() {
       try {
@@ -91,49 +100,58 @@ const User = (props: Props) => {
   }
 
   return (
-    <div className="pt-20 max-w-[1675px] mx-auto">
-      <div className="flex gap-3 border-b-2 border-[#C6AC8F] mb-3">
-        <img
-          className="w-20 h-full rounded-full"
-          src={`${
-            user.image === ''
-              ? 'https://carekeepr.com/assets/global/images/applicants_pic.png'
-              : 'http://localhost:3000/' + user.image
-          }`}
-          alt=""
-        />
-        <h3 className="text-white text-6xl">{user.name}</h3>
+    <ThemeProvider theme={theme}>
+      <div className="pt-20 max-w-[1675px] mx-auto">
+        <div className="flex gap-3 border-b-2 border-[#C6AC8F] mb-3">
+          <img
+            className="w-20 h-full rounded-full"
+            src={`${
+              user.image === ''
+                ? 'https://carekeepr.com/assets/global/images/applicants_pic.png'
+                : 'http://localhost:3000/' + user.image
+            }`}
+            alt=""
+          />
+          <h3 className="text-white text-6xl">{user.name}</h3>
+          {user?._id === userLogin?._id && (
+            <Button
+              component="label"
+              role={undefined}
+              variant="contained"
+              color="secondary"
+              tabIndex={-1}
+              startIcon={<CloudUploadIcon />}
+            >
+              Upload file
+              <VisuallyHiddenInput type="file" name="image" onChange={handleImageUpload} />
+            </Button>
+          )}
+        </div>
+        <div className="flex flex-col gap-10">
+          {userProducts.map((product) => (
+            <Link to={`/product/${product._id}`} className="max-w-[480px]">
+              {product.images[0] !== undefined ? (
+                <img className="rounded-[40px]" src={`http://localhost:3000/${product.images[0]}`} alt="" />
+              ) : (
+                <img className="rounded-[40px]" src="https://sklad-vlk.ru/d/cml_419459db_460fe794_2.jpg" alt="" />
+              )}
+              <h3 className="text-[#C6AC8F] text-4xl">{product.title}</h3>
+              <p className=" text-[#EAE0D5] text-xl">{product.description.split(' ').slice(0, 40).join(' ')}...</p>
+            </Link>
+          ))}
+        </div>
         {user?._id === userLogin?._id && (
-          <Button component="label" role={undefined} variant="contained" tabIndex={-1} startIcon={<CloudUploadIcon />}>
-            Upload file
-            <VisuallyHiddenInput type="file" name="image" onChange={handleImageUpload} />
-          </Button>
+          <div className='flex gap-5'>
+            <Button variant="contained" color="error" size="small" onClick={() => handleDeleteUser()}>
+              Удалить аккаунт
+            </Button>
+            <Button variant="contained" color="error" size="small" onClick={() => handleExit()}>
+              Выйти
+            </Button>
+          </div>
         )}
       </div>
-      <div className="flex flex-col gap-10">
-        {userProducts.map((product) => (
-          <Link to={`/product/${product._id}`} className='max-w-[480px]'>
-            {product.images[0] !== undefined ? (
-              <img className="rounded-[40px]" src={`http://localhost:3000/${product.images[0]}`} alt="" />
-            ) : (
-              <img className="rounded-[40px]" src="https://sklad-vlk.ru/d/cml_419459db_460fe794_2.jpg" alt="" />
-            )}
-            <h3 className="text-[#C6AC8F] text-4xl">{product.title}</h3>
-            <p className=" text-[#EAE0D5] text-xl">{product.description.split(' ').slice(0, 40).join(' ')}...</p>
-          </Link>
-        ))}
-      </div>
-      {user?._id === userLogin?._id && (
-        <>
-          <Button variant="contained" color="error" size="small" onClick={() => handleDeleteUser()}>
-            Удалить аккаунт
-          </Button>
-          <Button variant="contained" color="error" size="small" onClick={() => handleExit()}>
-            Выйти
-          </Button>
-        </>
-      )}
-    </div>
+    </ThemeProvider>
   );
 };
 
