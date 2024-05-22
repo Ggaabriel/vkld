@@ -3,8 +3,6 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
@@ -13,15 +11,22 @@ import Container from '@mui/material/Container';
 import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
 import { Link, useNavigate } from 'react-router-dom';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { baseUrl } from '../app/fetch';
 import axios from 'axios';
 import { useAppDispatch } from '../app/hooks/useAppDispatch';
 import { setUser } from '../app/store/slice/UserSlice';
 import { loadSlim } from 'tsparticles-slim';
 import Particles from 'react-particles';
+import { baseUrl } from '../app/fetch';
 
-// TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
+// Создание темы с кастомным цветом кнопок
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#22333B', // Ваш цвет фона для кнопок
+    },
+  },
+});
+
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
   clipPath: 'inset(50%)',
@@ -33,6 +38,7 @@ const VisuallyHiddenInput = styled('input')({
   whiteSpace: 'nowrap',
   width: 1,
 });
+
 export const options = {
   particles: {
     number: {
@@ -143,10 +149,23 @@ export const options = {
   },
   retina_detect: true,
 };
+
 export default function Register() {
+  const [selectedImage, setSelectedImage] = React.useState(null);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+
+  const handleImageChange = (event) => {
+    if (event.target.files && event.target.files[0]) {
+      setSelectedImage(URL.createObjectURL(event.target.files[0]));
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const datalog = new FormData(event.currentTarget);
     console.log({
@@ -166,23 +185,21 @@ export default function Register() {
     dispatch(setUser(await user));
     navigate('/');
   };
+
   const handleBack = () => {
     navigate('/');
   };
+
   const particlesInit = React.useCallback(async (engine) => {
-    console.log(engine);
-    // you can initiate the tsParticles instance (engine) here, adding custom shapes or presets
-    // this loads the tsparticles package bundle, it's the easiest method for getting everything ready
-    // starting from v2 you can add only the features you need reducing the bundle size
-    //await loadFull(engine);
     await loadSlim(engine);
   }, []);
+
   const particlesLoaded = React.useCallback(async (container) => {
     await console.log(container);
   }, []);
 
   return (
-    <ThemeProvider theme={defaultTheme}>
+    <ThemeProvider theme={theme}>
       <Particles id="particles-js" init={particlesInit} loaded={particlesLoaded} options={options} />
       <Container component="main" maxWidth="xs">
         <CssBaseline />
@@ -194,12 +211,9 @@ export default function Register() {
             alignItems: 'center',
           }}
         >
-          <Button variant="contained" color="secondary" onClick={handleBack}>
+          <Button variant="contained" color="primary" onClick={handleBack}>
             Назад
           </Button>
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
-          </Avatar>
           <Typography className='relative z-20' component="h1" variant="h5">
             Регистрация
           </Typography>
@@ -227,15 +241,24 @@ export default function Register() {
                   component="label"
                   role={undefined}
                   variant="contained"
+                  color="primary"
                   tabIndex={-1}
                   startIcon={<CloudUploadIcon />}
                 >
                   Загрузить аватар
-                  <VisuallyHiddenInput type="file" name="image" />
+                  <VisuallyHiddenInput type="file" name="image" onChange={handleImageChange} />
                 </Button>
               </Grid>
             </Grid>
-            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+            {selectedImage && (
+              <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <img src={selectedImage} className='relative z-10' alt="Selected" style={{ maxWidth: '100%', height: 'auto' }} />
+                <Button variant="contained" color="primary" onClick={handleRemoveImage} sx={{ mt: 1 }}>
+                  Удалить изображение
+                </Button>
+              </Box>
+            )}
+            <Button type="submit" fullWidth variant="contained" color="primary" sx={{ mt: 3, mb: 2 }}>
               Зарегистрироваться
             </Button>
             <Grid className='relative z-20' container justifyContent="flex-end">

@@ -5,7 +5,7 @@ import { baseUrl } from '../app/fetch';
 import { useAppDispatch } from '../app/hooks/useAppDispatch';
 import { setUser } from '../app/store/slice/UserSlice';
 import { useAppSelector } from '../app/hooks/useAppSelector';
-
+import vkld from "src/app/assets/vkld.png"
 type Props = {};
 
 const Header = (props: Props) => {
@@ -40,7 +40,7 @@ const Header = (props: Props) => {
       <header className="fixed w-full z-20 text-white bg-[#22333B]">
         <div className="max-w-[1675px] mx-auto h-[76px] grid grid-cols-12 gap-[20px] items-center ">
           <Link to="/">
-            <h1 className="col-start-1 col-end-3">ЛОГО</h1>
+            <img className='h-[76px]' src={vkld} alt="" />
           </Link>
           <ul className="flex gap-6 col-start-3 col-end-11">
             <li>
@@ -71,7 +71,7 @@ const Header = (props: Props) => {
                 <Link to={`/user/${user._id}`}>
                   <img
                     className="w-10 h-full rounded-full object-cover"
-                    src={`http://localhost:3000/${user.image}`}
+                    src={`${user.image === "" ? "https://carekeepr.com/assets/global/images/applicants_pic.png" : "http://localhost:3000/"+user.image}`}
                     alt=""
                   />
                 </Link>

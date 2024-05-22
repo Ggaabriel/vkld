@@ -89,7 +89,7 @@ const Products = (props: Props) => {
           >
               {category.products.map((product) => (
                 <SwiperSlide className="max-w-[480px]  flex flex-col text-[#EAE0D5]" key={product._id}>
-                  <Link to={`/product/${product._id}`}>
+                  <Link to={`/product/${product._id}`} >
                     {product.images[0] !== undefined ? (
                       <img className="rounded-[40px]" src={`http://localhost:3000/${product.images[0]}`} alt="" />
                     ) : (

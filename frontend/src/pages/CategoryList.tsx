@@ -27,12 +27,13 @@ const CategoryList = (props: Props) => {
   return (
     <div className="pt-20 grid grid-cols-2 gap-20 max-w-[1675px] mx-auto">
       {products.map((product) => (
-        <Link to={`/product/${product._id}`}>
-          <img
-            className="rounded-[40px] w-96 h-36 object-cover "
-            src={`http://localhost:3000/${product.images[0]}`}
-            alt=""
-          />
+        <Link to={`/product/${product._id}`} className='max-w-[480px]'>
+            {product.images[0] !== undefined ? (
+              <img className="rounded-[40px]" src={`http://localhost:3000/${product.images[0]}`} alt="" />
+            ) : (
+              <img className="rounded-[40px]" src="https://sklad-vlk.ru/d/cml_419459db_460fe794_2.jpg" alt="" />
+            )}
+          
           <h3 className="text-[#C6AC8F] text-6xl">{product.title}</h3>
           <p className=" text-[#EAE0D5] text-xl">{product.description.split(' ').slice(0, 40).join(' ')}...</p>
         </Link>

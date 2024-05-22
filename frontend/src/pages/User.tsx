@@ -65,7 +65,7 @@ const User = (props: Props) => {
       console.log('Image uploaded successfully', response.data);
       // Update the user state to display the new image
       dispatch(setUser(await response.data));
-      setUser2(await response.data)
+      setUser2(await response.data);
     } catch (error) {
       console.error('Error uploading image', error);
     }
@@ -93,7 +93,15 @@ const User = (props: Props) => {
   return (
     <div className="pt-20 max-w-[1675px] mx-auto">
       <div className="flex gap-3 border-b-2 border-[#C6AC8F] mb-3">
-        <img className="w-20 h-full rounded-full" src={`http://localhost:3000/${user.image}`} alt="" />
+        <img
+          className="w-20 h-full rounded-full"
+          src={`${
+            user.image === ''
+              ? 'https://carekeepr.com/assets/global/images/applicants_pic.png'
+              : 'http://localhost:3000/' + user.image
+          }`}
+          alt=""
+        />
         <h3 className="text-white text-6xl">{user.name}</h3>
         {user?._id === userLogin?._id && (
           <Button component="label" role={undefined} variant="contained" tabIndex={-1} startIcon={<CloudUploadIcon />}>
@@ -104,12 +112,12 @@ const User = (props: Props) => {
       </div>
       <div className="flex flex-col gap-10">
         {userProducts.map((product) => (
-          <Link to={`/product/${product._id}`}>
-            <img
-              className="rounded-[40px] w-96 h-36 object-cover "
-              src={`http://localhost:3000/${product.images[0]}`}
-              alt=""
-            />
+          <Link to={`/product/${product._id}`} className='max-w-[480px]'>
+            {product.images[0] !== undefined ? (
+              <img className="rounded-[40px]" src={`http://localhost:3000/${product.images[0]}`} alt="" />
+            ) : (
+              <img className="rounded-[40px]" src="https://sklad-vlk.ru/d/cml_419459db_460fe794_2.jpg" alt="" />
+            )}
             <h3 className="text-[#C6AC8F] text-4xl">{product.title}</h3>
             <p className=" text-[#EAE0D5] text-xl">{product.description.split(' ').slice(0, 40).join(' ')}...</p>
           </Link>

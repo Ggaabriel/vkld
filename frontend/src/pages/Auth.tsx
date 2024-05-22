@@ -17,7 +17,13 @@ import { loadSlim } from 'tsparticles-slim';
 import { options } from './Register';
 
 // TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
+const defaultTheme = createTheme({
+  palette: {
+    primary: {
+      main: '#22333B', // Ваш цвет фона для кнопок
+    },
+  },
+});
 
 export default function Auth() {
   const [loginData, setLoginData] = useState({
@@ -72,12 +78,9 @@ export default function Auth() {
             alignItems: 'center',
           }}
         >
-          <Button variant="contained" color="secondary" onClick={handleBack}>
+          <Button variant="contained" color="primary" onClick={handleBack}>
             Назад
           </Button>
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
-          </Avatar>
           <Typography className='relative z-20' component="h1" variant="h5">
             Авторизация
           </Typography>

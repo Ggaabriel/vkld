@@ -101,3 +101,13 @@ button:hover{
 .count-particles{
   border-radius: 0 0 3px 3px;
 }
+
+.mainStroke{
+  height: 48px !important;
+  width: 48px !important;
+}
+
+.mainStroke>path{
+  stroke: #C6AC8F;
+  fill: #C6AC8F
+}
