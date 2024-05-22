@@ -197,7 +197,7 @@ export class AuthController {
       return { message: 'Пользователь успешно удален' };
     } catch (error) {
       // Если возникает ошибка при удалении пользователя, возвращаем соответствующий статус
-      throw new HttpException('Ошибка при удалении пользователя', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException('Ошибка при удалении пользователя' + error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
   @Get()
