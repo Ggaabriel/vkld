@@ -25,7 +25,7 @@ const CategoryList = (props: Props) => {
   }, [category]);
 
   return (
-    <div className="pt-20 grid grid-cols-2 gap-20 max-w-[1675px] mx-auto">
+    <div className="pt-20 grid grid-cols-3 max-w-[1675px] mx-auto">
       {products.map((product) => (
         <Link to={`/product/${product._id}`} className='max-w-[480px]'>
             {product.images[0] !== undefined ? (

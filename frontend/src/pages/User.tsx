@@ -102,9 +102,9 @@ const User = (props: Props) => {
   return (
     <ThemeProvider theme={theme}>
       <div className="pt-20 max-w-[1675px] mx-auto">
-        <div className="flex gap-3 border-b-2 border-[#C6AC8F] mb-3">
+        <div className="flex gap-3 mb-3">
           <img
-            className="w-20 h-full rounded-full"
+            className="w-20 aspect-square rounded-full"
             src={`${
               user.image === ''
                 ? 'https://carekeepr.com/assets/global/images/applicants_pic.png'
@@ -127,7 +127,17 @@ const User = (props: Props) => {
             </Button>
           )}
         </div>
-        <div className="flex flex-col gap-10">
+        {user?._id === userLogin?._id && (
+          <div className='flex gap-5 border-b-2 border-[#C6AC8F] pb-3 mb-3'>
+            <Button variant="contained" color="error" size="small" onClick={() => handleDeleteUser()}>
+              Удалить аккаунт
+            </Button>
+            <Button variant="contained" color="error" size="small" onClick={() => handleExit()}>
+              Выйти
+            </Button>
+          </div>
+        )}
+        <div className="grid grid-cols-3  max-w-[1675px] mx-auto">
           {userProducts.map((product) => (
             <Link to={`/product/${product._id}`} className="max-w-[480px]">
               {product.images[0] !== undefined ? (
@@ -140,16 +150,6 @@ const User = (props: Props) => {
             </Link>
           ))}
         </div>
-        {user?._id === userLogin?._id && (
-          <div className='flex gap-5'>
-            <Button variant="contained" color="error" size="small" onClick={() => handleDeleteUser()}>
-              Удалить аккаунт
-            </Button>
-            <Button variant="contained" color="error" size="small" onClick={() => handleExit()}>
-              Выйти
-            </Button>
-          </div>
-        )}
       </div>
     </ThemeProvider>
   );

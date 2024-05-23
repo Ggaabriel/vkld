@@ -63,6 +63,7 @@ const Product: React.FC = () => {
   const user = useAppSelector((state) => state.user.user);
   const [product, setProduct] = useState<IProduct | null>(null);
   const [reviews, setReviews] = useState([]);
+  const [authors, setAuthors] = useState<IUser[]>([]);
   const [newReview, setNewReview] = useState({ review: '', rating: 0, images: [] });
   const { id } = useParams();
   const [author, setAuthor] = useState<IUser | null>(null);
@@ -83,6 +84,14 @@ const Product: React.FC = () => {
     try {
       const { data } = await axios.get(`${baseUrl}/review/byProduct/${id}`);
       setReviews(data);
+
+      const authorPromises = data.map(async (review) => {
+        const { data: user } = await axios.get(`${baseUrl}/auth/${review.userId}`);
+        return user;
+      });
+
+      const authorsData = await Promise.all(authorPromises);
+      setAuthors(authorsData);
     } catch (error) {
       console.error('Error fetching reviews:', error);
     }
@@ -201,7 +210,7 @@ const Product: React.FC = () => {
         </YMaps>
 
         {user?._id === author._id && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop:30 }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: 30 }}>
             <Button
               variant="contained"
               color="primary"
@@ -220,21 +229,27 @@ const Product: React.FC = () => {
           <Typography className="text-[#EAE0D5]" variant="h6">
             Отзывы
           </Typography>
-          {reviews.map((review) => (
+          {reviews.map((review, i) => (
             <Box key={review._id} className="border p-4 mb-4">
-              <Typography className='text-white' variant="body1">{review.review}</Typography>
+              {authors[i] && (
+                <Link className="flex items-center text-[#C6AC8F]" to={`/user/${review.userId}`}>
+                  <img
+                    className="w-10 aspect-square rounded-full"
+                    src={`${
+                      authors[i].image === ''
+                        ? 'https://carekeepr.com/assets/global/images/applicants_pic.png'
+                        : 'http://localhost:3000/' + authors[i].image
+                    }`}
+                    alt=""
+                  />
+                  {authors[i].name}
+                </Link>
+              )}
+              <Typography className="text-white" variant="body1">
+                {review.review}
+              </Typography>
               <CustomRating value={review.rating} readOnly />
-              <Box className="flex gap-2 mt-2">
-                {review.images &&
-                  review.images.map((image, index) => (
-                    <img
-                      key={index}
-                      src={`http://localhost:3000/${image}`}
-                      alt={`Review image ${index + 1}`}
-                      className="w-32 h-32 object-cover"
-                    />
-                  ))}
-              </Box>
+
               {user?._id === review.userId && (
                 <IconButton onClick={() => handleDeleteReview(review._id)}>
                   <LightDeleteIcon />
