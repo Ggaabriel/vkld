@@ -171,7 +171,7 @@ export class AuthController {
       const currentUser = await this.authService.findUserById(userId);
 
       //22222222
-      const products = await this.productService.findAllProducts();
+      const products = await this.productService.getAllProductsByUserId(userId);
 
       // 2. Для каждого продукта:
       for (const product of products) {
